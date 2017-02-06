@@ -46,10 +46,26 @@
   ))
 
 ;; Exercise 1.16
-(defn fast-exp [b n m]
+(defn fast-exp-iter [b n m]
   (cond (== n 1) (* b m)
         (== n 0) 1
-        (even? n) (fast-exp (Math/pow b 2) (/ n 2) m)
-        :else (fast-exp b (- n 1) (* b m))))
+        (even? n) (fast-exp-iter (Math/pow b 2) (/ n 2) m)
+        :else (fast-exp-iter b (- n 1) (* b m))))
 
-(fast-exp 3 3 1)
+(defn fast-exp [b n]
+  (fast-exp-iter b n 1))
+
+
+;; Exercise 1.17
+(defn doubfn [n] (* 2 n))
+
+(defn halvfn [n] (/ n 2))
+
+(defn fast-mul-iter [b n m]
+  (cond (== n 1) (+ b m)
+        (== n 0) 0
+        (even? n) (fast-mul-iter (doubfn b) (halvfn n) m)
+        :else (fast-mul-iter b (- n 1) (+ b m))))
+
+(defn fast-mul [b n]
+  (fast-mul-iter b n 0))
