@@ -61,6 +61,13 @@
 
 (defn halvfn [n] (/ n 2))
 
+(defn fast-mul-rec [b n]
+  (cond (== n 1) b
+        (== n 0) 0
+        (even? n) (fast-mul-rec (doubfn b) (halvfn n))
+        :else (+ b (fast-mul-rec b (- n 1)))))
+
+;; Exercise 1.18
 (defn fast-mul-iter [b n m]
   (cond (== n 1) (+ b m)
         (== n 0) 0
