@@ -1,10 +1,5 @@
 (ns sicp-exercises.lesson1)
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
-
 ;; Exercise 1.11
 (defn f [n]
   (if (< n 3)
@@ -76,3 +71,22 @@
 
 (defn fast-mul [b n]
   (fast-mul-iter b n 0))
+
+;; Exercise 1.19
+(defn pprime [p q]
+  (+ (* q q) (* p p)))
+
+(defn qprime [p q]
+  (+ (* q q) (* 2 q p)))
+
+(defn fib-iter [a b p q coun]
+  (cond (== coun 0) b
+        (even? coun) (fib-iter a b (pprime p q) (qprime p q) (/ coun 2))
+        :else (fib-iter (+ (* b q) (* a q) (* a p)) (+ (* b p) (* a q)) p q (- coun 1))))
+
+(defn fib [n]
+  (fib-iter 1 0 0 1 n))
+
+(defn showfib[n]
+  (map fib (range n)))
+
