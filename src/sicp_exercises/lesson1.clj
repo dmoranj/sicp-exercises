@@ -45,4 +45,11 @@
                      [1])
   ))
 
+;; Exercise 1.16
+(defn fast-exp [b n m]
+  (cond (== n 1) (* b m)
+        (== n 0) 1
+        (even? n) (fast-exp (Math/pow b 2) (/ n 2) m)
+        :else (fast-exp b (- n 1) (* b m))))
 
+(fast-exp 3 3 1)
