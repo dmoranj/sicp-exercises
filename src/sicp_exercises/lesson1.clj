@@ -192,6 +192,27 @@
 (carmichael)
 
 
+;; Exercise 1.28 (solution adapted to Clojure from http://www.billthelizard.com/2010/03/sicp-exercise-128-miller-rabin-test.html).
+;; I tried after failing miserably once and again with my Clojure implementation and this one still fails miserably with
+;; carmichael's numbers.
+(defn square-check [x m]
+  (if (and (not (or (== x 1) (== x (- m 1))))
+           (== (rem (* x x) m) 1))
+      0
+      (rem (* x x) m)))
 
+(defn expmod-mr [base exp m]
+  (cond (== exp 0) 1
+        (even? exp)
+          (square-check (expmod-mr base (/ exp 2) m) m)
+        :else
+          (rem (* base (expmod-mr base (- exp 1) m)) m)))
 
+(defn miller-rabin-test [n]
+  (let [try-it (fn [a] (== (expmod a (- n 1) n) 1))]
+    (try-it (+ 2 (rand-int (- n 2))))))
+
+(defn carmichael-mr []
+  (let [test-numbers (range 2 50)]
+    (map #(vector % (miller-rabin-test %)) test-numbers)))
 
