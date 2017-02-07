@@ -126,3 +126,5 @@
   (time (search-for-primes 10000 11000 3))
   (time (search-for-primes 100000 110000 3))
   (time (search-for-primes 1000000 1100000 3)))
+
+(prime-time)
