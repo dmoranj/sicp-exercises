@@ -177,9 +177,21 @@
   (time (search-for-primes 100000 110000 3 fprime?))
   (time (search-for-primes 1000000 1100000 3 fprime?)))
 
+;; Exercise 1.27
+(defn carmichael-test[n]
+  (loop [a 2
+         fermat true]
+    (if (or (== a n) (not fermat))
+      fermat
+      (recur (inc a) (and fermat (== (expmod a n n) a))))))
 
-(prime-time-next)
-(prime-time-fast)
+(defn carmichael []
+  (let [test-numbers [561, 1105, 1729, 2465, 2821, 6601]]
+    (map carmichael-test test-numbers)))
+
+(carmichael)
+
+
 
 
 
