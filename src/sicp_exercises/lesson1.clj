@@ -94,12 +94,35 @@
 (defn divides? [a b]
   (== (rem b a) 0))
 
-(defn find-divisor [n test-divisor]
-  (cond (> (* test-divisor test-divisor) n) n
-        (divides? test-divisor n) test-divisor
-        :else (find-divisor n (+ test-divisor 1))))
+(defn find-divisor [n-init ts-init]
+  (loop [n n-init
+         test-divisor ts-init]
+    (cond (> (* test-divisor test-divisor) n) n
+          (divides? test-divisor n) test-divisor
+          :else (recur n (+ test-divisor 1)))))
 
 
 (defn smallest-divisor [n]
   (find-divisor n 2))
 
+
+;; Exercise 1.22
+(defn prime?[n]
+  (== (smallest-divisor n) n))
+
+(defn search-for-primes-iter [a b i n total]
+  (let [test-n (+ a i)]
+    (cond (== test-n b) n
+          (== (count n) total) n
+          (prime? test-n) (search-for-primes-iter a b (inc i) (conj n test-n) total)
+          :else (search-for-primes-iter a b (inc i) n total))))
+
+(defn search-for-primes[a b total]
+  (search-for-primes-iter a b 0 [] total))
+
+
+(defn prime-time[]
+  (time (search-for-primes 1000 1100 3))
+  (time (search-for-primes 10000 11000 3))
+  (time (search-for-primes 100000 110000 3))
+  (time (search-for-primes 1000000 1100000 3)))
