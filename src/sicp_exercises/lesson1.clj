@@ -149,3 +149,37 @@
   (time (search-for-primes 10000 11000 3 prime-next?))
   (time (search-for-primes 100000 110000 3 prime-next?))
   (time (search-for-primes 1000000 1100000 3 prime-next?)))
+
+;; Exercise 1.24
+(defn expmod [base exp m]
+  (cond
+    (== exp 0) 1
+    (even? exp) (rem (Math/pow (expmod base (/ exp 2) m) 2) m)
+    :else      (rem (* base (expmod base (- exp 1) m)) m)))
+
+(defn fermat-test [n]
+  (let [try-it (fn [a]
+                 (== (expmod a n n) a))]
+    (try-it (+ 1 (int (* (Math/random) (dec n)))))))
+
+(defn fast-prime? [n times]
+  (cond (== times 0) true
+        (fermat-test n) (fast-prime? n (dec times))
+        :else false))
+
+(defn fprime? [n]
+  (fast-prime? n 3))
+
+
+(defn prime-time-fast[]
+  (time (search-for-primes 1000 1100 3 fprime?))
+  (time (search-for-primes 10000 11000 3 fprime?))
+  (time (search-for-primes 100000 110000 3 fprime?))
+  (time (search-for-primes 1000000 1100000 3 fprime?)))
+
+
+(prime-time-next)
+(prime-time-fast)
+
+
+
