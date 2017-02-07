@@ -118,8 +118,8 @@
           :else (search-for-primes-iter a b (inc i) n total))))
 
 (defn search-for-primes[a b total]
+  {:pre  [(and (< a b) (> total 0))]}
   (search-for-primes-iter a b 0 [] total))
-
 
 (defn prime-time[]
   (time (search-for-primes 1000 1100 3))
@@ -127,4 +127,4 @@
   (time (search-for-primes 100000 110000 3))
   (time (search-for-primes 1000000 1100000 3)))
 
-(prime-time)
+
