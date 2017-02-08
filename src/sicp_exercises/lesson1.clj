@@ -30,7 +30,6 @@
 
 (pairwise-sum [1 3 3 1])
 
-
 (defn pascal [n]
   (cond
     (== n 0) [1]
@@ -304,3 +303,37 @@
   (accumulate * 1 identity 1 inc 5) ;; 5 * 4 * 3 * 2 * 1 = 5!
 )
 
+;; Exercise 1.33
+(defn trusty [n] true)
+
+(defn filtered-accumulate[filterfn combiner null-value term ainit nex b]
+  (loop [a ainit
+         result null-value]
+    (cond
+      (> a b) result
+      (filterfn a) (recur (nex a) (combiner result (term a)))
+      :else (recur (nex a) result))))
+
+(defn square[n]
+  (* n n))
+
+(defn sum-square-prime[a b]
+  (filtered-accumulate prime? + 0 square a inc b))
+
+(defn gcd [a b]
+  (if (= b 0)
+    a
+    (gcd b (rem a b))))
+
+(defn relative-prime[n]
+  (let [relprime (fn [a]
+                   (== (gcd a n) 1))]
+  (filtered-accumulate relprime * 1 identity 1 inc n)))
+
+
+(map #(vector % (gcd % 10)) (range 1 10))
+
+(defn show-filtered-accumulate[]
+  (sum-square-prime 1 10) ;; 1 + 2^2 + 3^2 + 5^2 + 7^2 = 1 + 4 + 9 + 25 + 49
+  (relative-prime 10) ;; 3 * 7 * 9 = 189
+  )
