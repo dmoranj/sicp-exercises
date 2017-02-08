@@ -261,3 +261,33 @@
 (defn integral-iter [f a b dx]
   (let [add-dx #(+ % dx)]
     (* (sumi f (+ a (/ dx 2.0)) add-dx b) dx)))
+
+
+;; Exercise 1.31
+(defn product [term a nex b]
+  (if (> a b)
+    1
+    (* (term a)
+       (product term (nex a) nex b))))
+
+(defn factorial[n]
+  (product identity 1 inc n))
+
+(defn alternate[n]
+  (if (even? n)
+    (/ n (inc n))
+    (/ (inc n) n)))
+
+(defn pi[n]
+  (* 4.0 (product alternate 2 inc n)))
+
+(defn product-iter [term ainit nex b]
+  (loop [a ainit
+         result 1]
+    (if (> a b)
+      result
+      (recur (nex a) (* result (term a))))))
+
+(defn pi-iter[n]
+  (* 4.0 (product-iter alternate 2 inc n)))
+
