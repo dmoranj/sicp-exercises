@@ -216,3 +216,35 @@
   (let [test-numbers (range 2 50)]
     (map #(vector % (miller-rabin-test %)) test-numbers)))
 
+;; Exercise 1.29
+(defn cube [n]
+  (* n n n))
+
+(defn sum [term a nex b]
+  (if (> a b)
+    0
+    (+ (term a)
+       (sum term (nex a) nex b))))
+
+(defn integral [f a b dx]
+  (let [add-dx #(+ % dx)]
+    (* (sum f (+ a (/ dx 2.0)) add-dx b) dx)))
+
+(defn ssum [term a nex b i coef]
+  (if (> a b)
+    0
+    (+ (coef i (term a))
+       (ssum term (nex a) nex b (inc i) coef))))
+
+(defn simpson [f a b n]
+  (let [h (/ (- b a) n)
+        nex #(+ % h)
+        coef (fn [i value]
+               (* (cond (== i 0) 1.0
+                     (== i n) 1.0
+                     (even? i) 2.0
+                     :else 4) value))]
+
+    (* (/ h 3) (ssum f a nex b 0 coef))))
+
+(simpson cube 0 1 4)
