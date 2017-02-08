@@ -337,3 +337,24 @@
   (sum-square-prime 1 10) ;; 1 + 2^2 + 3^2 + 5^2 + 7^2 = 1 + 4 + 9 + 25 + 49
   (relative-prime 10) ;; 3 * 7 * 9 = 189
   )
+
+;; Exercise 1.35
+(def tolerance 0.00001)
+
+(defn close-enough?[v1 v2]
+  (< (Math/abs (- v1 v2)) tolerance))
+
+(defn fixed-point [f first-guess]
+  (let [tryfn (fn tryfn[guess]
+                (let [nex (f guess)]
+                  (if (close-enough? guess nex)
+                    nex
+                    (tryfn nex))))]
+    (tryfn first-guess)))
+
+(defn phi [n]
+  (+ 1 (/ 1 n)))
+
+(defn calculate-phi []
+  (fixed-point phi 1.0))
+
