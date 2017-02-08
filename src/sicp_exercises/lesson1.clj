@@ -291,3 +291,16 @@
 (defn pi-iter[n]
   (* 4.0 (product-iter alternate 2 inc n)))
 
+;; Exercise 1.32
+(defn accumulate[combiner null-value term ainit nex b]
+  (loop [a ainit
+         result null-value]
+    (if (> a b)
+      result
+      (recur (nex a) (combiner result (term a))))))
+
+(defn show-accumulations[]
+  (accumulate + 0 identity 1 inc 5) ;; 5 + 4 + 3 + 2 + 1
+  (accumulate * 1 identity 1 inc 5) ;; 5 * 4 * 3 * 2 * 1 = 5!
+)
+
