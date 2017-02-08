@@ -248,3 +248,16 @@
     (* (/ h 3) (ssum f a nex b 0 coef))))
 
 (simpson cube 0 1 4)
+
+;; Exercise 1.30
+(defn sumi [term a nex b]
+  (let [iter (fn iter[a result]
+               (if (> a b)
+                 result
+                 (iter (nex a) (+ result (term a)))))]
+    (iter a 0)
+    ))
+
+(defn integral-iter [f a b dx]
+  (let [add-dx #(+ % dx)]
+    (* (sumi f (+ a (/ dx 2.0)) add-dx b) dx)))
