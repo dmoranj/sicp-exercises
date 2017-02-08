@@ -345,8 +345,10 @@
   (< (Math/abs (- v1 v2)) tolerance))
 
 (defn fixed-point [f first-guess]
+  (print "\n")
   (let [tryfn (fn tryfn[guess]
                 (let [nex (f guess)]
+                  (print " o")
                   (if (close-enough? guess nex)
                     nex
                     (tryfn nex))))]
@@ -357,4 +359,15 @@
 
 (defn calculate-phi []
   (fixed-point phi 1.0))
+
+;; Exercise 1.36
+(defn xlog [n]
+  (/ (Math/log 1000) (Math/log n)))
+
+(defn xlog-damped [n]
+  (* 0.5 (+ n (xlog n))))
+
+(defn show-fixed-point-damped []
+  (fixed-point xlog 1.2)
+  (fixed-point xlog-damped 1.2))
 
