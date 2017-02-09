@@ -399,4 +399,17 @@
              (fn [n] 1.0)
              20))))
 
-(calculate-phi-cf)
+;; Exercise 1.38
+(defn d-e [n]
+  (if (== 0 (rem (inc n) 3))
+    (* 2 (/ (inc n) 3))
+    1))
+
+(defn calculate-e []
+  (+ 2 (cont-frac-iter
+             (fn [n] 1.0)
+             d-e
+             200)))
+
+
+
