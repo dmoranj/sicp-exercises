@@ -384,6 +384,7 @@
 (defn cont-frac-iter [n d k]
   (loop [i (dec k)
          result (/ (n k) (d k))]
+    (print "i=" i "result=" result "n=" (n i) "d=" (d i) "\n")
     (if (== i 0)
       result
       (let [new-result (/ (n i) (+ (d i) result))]
@@ -412,4 +413,20 @@
              200)))
 
 
+;; Exercise 1.39
+(defn even-num[n]
+  (dec (* 2 n)))
 
+(defn tan-cf [x k]
+  (let [squares (fn [n]
+                  (if (== n 1)
+                    x
+                    (- (* x x))))]
+    (cont-frac-iter
+                squares
+                even-num
+                k)
+    )
+  )
+
+(tan-cf 2 20)
