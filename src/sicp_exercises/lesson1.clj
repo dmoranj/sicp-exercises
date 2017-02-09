@@ -415,7 +415,7 @@
 
 ;; Exercise 1.39
 (defn even-num[n]
-  (dec (* 2 n)))
+  (dec (* 2.0 n)))
 
 (defn tan-cf [x k]
   (let [squares (fn [n]
@@ -425,8 +425,6 @@
     (cont-frac-iter
                 squares
                 even-num
-                k)
-    )
-  )
+                k)))
 
-(tan-cf 2 20)
+
