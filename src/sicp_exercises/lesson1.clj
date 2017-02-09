@@ -360,6 +360,7 @@
 (defn calculate-phi []
   (fixed-point phi 1.0))
 
+
 ;; Exercise 1.36
 (defn xlog [n]
   (/ (Math/log 1000) (Math/log n)))
@@ -371,3 +372,31 @@
   (fixed-point xlog 1.2)
   (fixed-point xlog-damped 1.2))
 
+;; Exercise 1.37
+(defn cont-frac-recur [n d k i]
+  (if (== k i)
+    (/ (n i) (d i))
+    (/ (n i) (+ (d i) (cont-frac-recur n d k (inc i))))))
+
+(defn cont-frac[n d k]
+  (cont-frac-recur n d k 0))
+
+(defn cont-frac-iter [n d k]
+  (loop [i (dec k)
+         result (/ (n k) (d k))]
+    (if (== i 0)
+      result
+      (let [new-result (/ (n i) (+ (d i) result))]
+        (recur (dec i) new-result)))))
+
+(defn calculate-phi-cf []
+  (vector (/ 1 (cont-frac (fn [n] 1.0)
+             (fn [n] 1.0)
+             20)),
+
+  (/ 1 (cont-frac-iter
+             (fn [n] 1.0)
+             (fn [n] 1.0)
+             20))))
+
+(calculate-phi-cf)
