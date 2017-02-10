@@ -54,3 +54,49 @@
   (print-rat (add-rat one-half one-third))
   (print-rat (mul-rat one-half one-third))
   (print-rat (add-rat one-third one-third))))
+
+;; Exercise 2.2
+(defn make-segment [i e]
+  (list i e))
+
+(defn start-segment [s]
+  (first s))
+
+(defn end-segment [s]
+  (second s))
+
+(defn make-point [x y]
+  (list x y))
+
+(defn x-point [p]
+  (first p))
+
+(defn y-point [p]
+  (second p))
+
+(defn print-point [p]
+  (println)
+  (print "(")
+  (print (x-point p))
+  (print ", ")
+  (print (y-point p))
+  (print ")"))
+
+(defn midpoint-segment[s]
+  (let [x0 (x-point (start-segment s))
+        y0 (y-point (start-segment s))
+        x1 (x-point (end-segment s))
+        y1 (y-point (end-segment s))]
+    (make-point (/ (+ x0 x1) 2)
+                (/ (+ y0 y1) 2))))
+
+(defn show-points[]
+  (let [p0 (make-point 2 0)
+        p1 (make-point 6 0)
+        p2 (make-point 2 1)
+        p3 (make-point 6 5)
+        s0 (make-segment p0 p1)
+        s1 (make-segment p2 p3)]
+    (print-point (midpoint-segment s0))
+    (print-point (midpoint-segment s1))))
+
