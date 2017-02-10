@@ -204,7 +204,7 @@
   (println "One applied o a number: " ((one inc) 2))
   (println "One calculated as succ(0) and applied: " (((add-1 zero) inc) 2)))
 
-;; Exercise 2.7 and 2.8
+;; Exercise 2.7, 2.8, 2.10
 (defn make-interval [a b]
   (list a b))
 
@@ -231,6 +231,7 @@
                    (max p1 p2 p3 p4))))
 
 (defn div-interval [x y]
+  {:pre [(not (and (> (upper-bound y) 0) (< (lower-bound y) 0)))] }
   (mul-interval x
                 (make-interval (/ 1.0 (upper-bound y))
                                (/ 1.0 (lower-bound y)))))
