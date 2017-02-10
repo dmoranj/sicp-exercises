@@ -209,10 +209,10 @@
   (list a b))
 
 (defn upper-bound [i]
-  (first i))
+  (second i))
 
 (defn lower-bound [i]
-  (second i))
+  (first i))
 
 (defn add-interval [x y]
   (make-interval (+ (lower-bound x) (lower-bound y))
@@ -221,7 +221,6 @@
 (defn sub-interval [x y]
   (make-interval (- (lower-bound x) (upper-bound y))
                  (- (upper-bound x) (lower-bound y))))
-
 
 (defn mul-interval [x y]
   (let [p1 (* (lower-bound x) (lower-bound y))
@@ -246,4 +245,22 @@
     (print-interval (sub-interval i1 i2))
     (print-interval (mul-interval i1 i2))
     (print-interval (div-interval i1 i2))
+    ))
+
+;; Exercise 2.9
+(defn width [i]
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(defn show-interval-widths[]
+  (let [i1 (make-interval 12.8 13.2)
+        i2 (make-interval 5.4 5.6)
+        sum (add-interval i1 i2)
+        substraction (sub-interval i1 i2)
+        product (mul-interval i1 i2)
+        division (div-interval i1 i2)]
+    (println "Width of i1: " (width i1) " Width of i2: " (width i2))
+    (println "Width of the sum: " (width sum))
+    (println "Width of the substraction: " (width substraction))
+    (println "Width of the product: " (width product))
+    (println "Width of the division: " (width division))
     ))
