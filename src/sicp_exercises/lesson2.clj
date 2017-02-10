@@ -181,3 +181,28 @@
 (defn show-cdr-2[]
   (print "Car: " (car-2 (cons-2 3 4)) "\n")
   (print "Cdr: " (cdr-2 (cons-2 3 4)) "\n"))
+
+;; Exercise 2.6
+(def zero
+  (fn [f]
+    (fn [x]
+      x)))
+
+(def one
+  (fn [f]
+    (fn [x]
+      (f x))))
+
+(defn add-1 [n]
+  (fn [f]
+    (fn [x]
+      (f ((n f) x))
+      )))
+
+(defn show-church-numerals[]
+  (println "Zero applied to a number: " ((zero inc) 2))
+  (println "One applied o a number: " ((one inc) 2))
+  (println "One calculated as succ(0) and applied: " (((add-1 zero) inc) 2)))
+
+
+
