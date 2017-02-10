@@ -145,3 +145,19 @@
     ))
 
 (show-rectangles)
+
+;; Exercise 2.4
+(defn cons-1 [x y]
+  (fn [m]
+    (m x y)))
+
+(defn car-1 [z]
+  (z (fn [p q] p)))
+
+(defn cdr-1 [z]
+  (z (fn [p q] q)))
+
+(defn show-cdr[]
+  (print "Car: " (car-1 (cons-1 3 4)) "\n")
+  (print "Cdr: " (cdr-1 (cons-1 3 4)) "\n"))
+
