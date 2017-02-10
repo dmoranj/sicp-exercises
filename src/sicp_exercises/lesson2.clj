@@ -204,5 +204,46 @@
   (println "One applied o a number: " ((one inc) 2))
   (println "One calculated as succ(0) and applied: " (((add-1 zero) inc) 2)))
 
+;; Exercise 2.7 and 2.8
+(defn make-interval [a b]
+  (list a b))
+
+(defn upper-bound [i]
+  (first i))
+
+(defn lower-bound [i]
+  (second i))
+
+(defn add-interval [x y]
+  (make-interval (+ (lower-bound x) (lower-bound y))
+                 (+ (upper-bound x) (upper-bound y))))
+
+(defn sub-interval [x y]
+  (make-interval (- (lower-bound x) (upper-bound y))
+                 (- (upper-bound x) (lower-bound y))))
 
 
+(defn mul-interval [x y]
+  (let [p1 (* (lower-bound x) (lower-bound y))
+        p2 (* (lower-bound x) (upper-bound y))
+        p3 (* (upper-bound x) (lower-bound y))
+        p4 (* (upper-bound x) (upper-bound y))]
+    (make-interval (min p1 p2 p3 p4)
+                   (max p1 p2 p3 p4))))
+
+(defn div-interval [x y]
+  (mul-interval x
+                (make-interval (/ 1.0 (upper-bound y))
+                               (/ 1.0 (lower-bound y)))))
+
+(defn print-interval[i]
+  (println "(" (lower-bound i) ", " (upper-bound i) ")"))
+
+(defn show-intervals[]
+  (let [i1 (make-interval 12.8 13.2)
+        i2 (make-interval 5.4 5.6)]
+    (print-interval (add-interval i1 i2))
+    (print-interval (sub-interval i1 i2))
+    (print-interval (mul-interval i1 i2))
+    (print-interval (div-interval i1 i2))
+    ))
