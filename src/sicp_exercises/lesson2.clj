@@ -161,3 +161,23 @@
   (print "Car: " (car-1 (cons-1 3 4)) "\n")
   (print "Cdr: " (cdr-1 (cons-1 3 4)) "\n"))
 
+;; Exercise 2.5
+(defn factorpower[n p]
+  {:pre [(> n 0) (or (== p 2) (== p 3))] }
+  (if (== (rem n p) 0)
+    (inc (factorpower (/ n p) p))
+    0))
+
+(defn cons-2 [x y]
+  {:pre [(> x 0) (> y 0)] }
+  (* (Math/pow 2 x) (Math/pow 3 y)))
+
+(defn car-2 [z]
+  (factorpower z 2))
+
+(defn cdr-2 [z]
+  (factorpower z 3))
+
+(defn show-cdr-2[]
+  (print "Car: " (car-2 (cons-2 3 4)) "\n")
+  (print "Cdr: " (cdr-2 (cons-2 3 4)) "\n"))
