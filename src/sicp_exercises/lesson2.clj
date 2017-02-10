@@ -100,3 +100,48 @@
     (print-point (midpoint-segment s0))
     (print-point (midpoint-segment s1))))
 
+;; Exercise 2.3
+(defn make-rectangle1 [x0 y0 w h]
+  (list (make-point x0 y0) (make-point (+ x0 w) (+ y0 h))))
+
+(defn height1 [r]
+  (- (second (second r))
+     (second (first r))))
+
+(defn width1 [r]
+  (- (first (second r))
+     (first (first r))))
+
+(defn make-rectangle2 [x0 y0 w h]
+  (list (make-segment (make-point x0 y0) (make-point (+ x0 w) y0))
+        (make-segment (make-point x0 y0) (make-point x0 (+ y0 h)))))
+
+(defn modulus[r]
+  (let [x0 (x-point (start-segment r))
+        y0 (y-point (start-segment r))
+        x1 (x-point (end-segment r))
+        y1 (y-point (end-segment r))]
+    (Math/sqrt (+ (Math/pow (- x1 x0) 2) (Math/pow (- y1 y0) 2)))))
+
+(defn height2 [r]
+  (modulus (second r)))
+
+(defn width2 [r]
+  (modulus (first r)))
+
+;; The implementation to use is passed as function parameters to the fns
+;; to avoid redefining the procedures in the same file
+(defn perimeter [r wfn hfn]
+  (+ (* 2 (wfn r)) (* 2 (hfn r))))
+
+(defn area [r wfn hfn]
+  (* (wfn r) (hfn r)))
+
+(defn show-rectangles[]
+  (let [r1 (make-rectangle1 0 0 8 4)
+        r2 (make-rectangle2 0 0 8 4)]
+    (print "R1 -> Area: " (area r1 width1 height1) " Perimeter: " (perimeter r1 width1 height1) "\n")
+    (print "R2 -> Area: " (area r2 width2 height2) " Perimeter: " (perimeter r2 width2 height2) "\n")
+    ))
+
+(show-rectangles)
