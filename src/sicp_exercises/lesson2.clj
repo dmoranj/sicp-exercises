@@ -461,4 +461,13 @@
 (defn show-foreach[]
   (foreach #(println "The item is: " %) '(1 2 3 4)))
 
+;; Exercise 2.25
+(def list1 '(1 3 (5 7) 9))
+(def list2 '((7)))
+(def list3 '(1 (2 (3 (4 (5 (6 7)))))))
+
+(defn show-carcdrs[]
+  (println (-> list1 rest rest first rest first))
+  (println (-> list2 first first))
+  (println (-> list3 rest first rest first rest first rest first rest first rest first)))
 
