@@ -395,9 +395,13 @@
     (cons (first list1) (append (rest list1) list2))))
 
 (defn revers [l]
-  (if (empty? (rest l))
-    l
-    (append (revers (rest l)) (list (first l)))))
+  (loop [result '()
+         current l]
+    (if (empty? current)
+      result
+      (recur (cons (first current) result) (rest current)))))
+
+(revers '(1 2 3 4 5))
 
 ;; Exercise 2.19
 (def us-coins (list 50 25 10 5 1))
@@ -420,4 +424,16 @@
           (+ (cc amount (except-first-denomination coin-values))
              (cc (- amount (first-denomination coin-values)) coin-values))))
 
+;; Exercise 2.20
+(defn equal-parity? [x y]
+  (or (and (even? x) (even? y)) (and (odd? x) (odd? y))))
+
+(defn same-parity[& l]
+  (let [initial (first l)]
+    (revers (loop [result '()
+           current l]
+      (cond
+        (empty? current) result
+        (equal-parity? initial (first current)) (recur (cons (first current) result) (rest current))
+        :else (recur result (rest current)))))))
 
