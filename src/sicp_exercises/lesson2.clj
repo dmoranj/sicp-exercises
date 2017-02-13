@@ -449,3 +449,16 @@
 (defn show-square-list[]
   (println (square-list1 '(1 2 3 4)))
   (println (square-list2 '(1 2 3 4))))
+
+;; Exercise 2.23
+(defn foreach [f items]
+  (if (empty? items)
+    true
+    (do
+      (f (first items))
+      (foreach f (rest items)))))
+
+(defn show-foreach[]
+  (foreach #(println "The item is: " %) '(1 2 3 4)))
+
+
