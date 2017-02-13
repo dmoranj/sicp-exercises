@@ -471,3 +471,19 @@
   (println (-> list2 first first))
   (println (-> list3 rest first rest first rest first rest first rest first rest first)))
 
+;; Exercise 2.27
+(defn deep-reverse[l]
+  (let [car (first l)
+        cdr (rest l)]
+    (cond
+      (empty? l) '()
+      (list? car) (append (deep-reverse cdr) (list (deep-reverse car)))
+      :else       (append (deep-reverse cdr) (list car)))))
+
+(defn show-deep-reverse[]
+  (let [x (list (list 1 2) (list 3 4))]
+    (println x)
+    (println (reverse x))
+    (println (deep-reverse x))))
+
+
