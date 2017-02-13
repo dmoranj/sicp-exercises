@@ -347,3 +347,15 @@
   (print-interval (make-center-percent 6 5))
   (println (percent (make-interval 7.2 8.8)))
   )
+
+;; Exercise 2.13
+(defn show-small-tolerance[]
+  (let [i1 (make-center-percent 8 0.01)
+        i2 (make-center-percent 6 0.5)
+        i3 (make-center-percent 7 0.02)]
+    (println "%1: " (percent i1) " %2: " (percent i2) " %Product: " (percent (mul-interval i1 i2)))
+    (println "%1: " (percent i2) " %2: " (percent i3) " %Product: " (percent (mul-interval i2 i3)))
+    (println "%1: " (percent i3) " %2: " (percent i1) " %Product: " (percent (mul-interval i3 i1)))
+  ))
+
+
