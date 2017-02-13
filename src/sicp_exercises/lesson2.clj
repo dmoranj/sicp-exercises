@@ -323,5 +323,27 @@
 
     (map display tests)))
 
+;; Exercise 2.12
+(defn make-center-width [c w]
+  (make-interval (- c w) (+ c w)))
 
+(defn center [i]
+  (/ (+ (lower-bound i) (upper-bound i)) 2))
 
+(defn width [i]
+  (/ (- (upper-bound i) (lower-bound i)) 2))
+
+(defn make-center-percent [center percent]
+  (let [t (Math/abs (* center (/ percent 100.0)))]
+  (make-interval (- center t) (+ center t))))
+
+(defn percent[i]
+  (let [c (center i)
+        t (width i)]
+    (Math/abs (* (/ t c) 100))))
+
+(defn show-center-percent[]
+  (print-interval (make-center-percent 8 10))
+  (print-interval (make-center-percent 6 5))
+  (println (percent (make-interval 7.2 8.8)))
+  )
