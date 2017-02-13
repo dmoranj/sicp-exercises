@@ -388,3 +388,13 @@
     (first l)
     (last-pair (rest l))))
 
+;; Exercise 2.18
+(defn append [list1 list2]
+  (if (empty? list1)
+    list2
+    (cons (first list1) (append (rest list1) list2))))
+
+(defn revers [l]
+  (if (empty? (rest l))
+    l
+    (append (revers (rest l)) (list (first l)))))
