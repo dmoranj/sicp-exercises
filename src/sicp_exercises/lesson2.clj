@@ -265,3 +265,63 @@
     (println "Width of the product: " (width product))
     (println "Width of the division: " (width division))
     ))
+
+
+;; Exercise 2.11
+(defn mul-interval-op [x y]
+  (cond
+    (and (pos? (lower-bound x)) (pos? (lower-bound y)))
+      (make-interval (* (lower-bound x) (lower-bound y))
+                (* (upper-bound x) (upper-bound y)))
+
+    (and (neg? (upper-bound x)) (neg? (upper-bound y)))
+      (make-interval (* (upper-bound x) (upper-bound y))
+                (* (lower-bound x) (lower-bound y)))
+
+    (and (pos? (lower-bound x)) (neg? (upper-bound y)))
+      (make-interval (* (upper-bound x) (lower-bound y))
+                (* (lower-bound x) (upper-bound y)))
+
+    (and (neg? (upper-bound x)) (pos? (lower-bound y)))
+      (make-interval (* (lower-bound x) (upper-bound y))
+                (* (upper-bound x) (lower-bound y)))
+
+    (and (neg? (lower-bound x)) (pos? (upper-bound y)) (neg? (upper-bound y)))
+      (make-interval (* (upper-bound x) (lower-bound y))
+                (* (lower-bound x) (lower-bound y)))
+
+    (and (neg? (lower-bound x)) (pos? (upper-bound y)) (pos? (lower-bound y)))
+      (make-interval (* (lower-bound x) (upper-bound y))
+                (* (upper-bound x) (upper-bound y)))
+
+    (and (neg? (upper-bound x)) (pos? (lower-bound y)) (neg? (upper-bound x)))
+      (make-interval (* (lower-bound x) (upper-bound y))
+                (* (lower-bound x) (lower-bound y)))
+
+    (and (neg? (upper-bound x)) (pos? (lower-bound y)) (pos? (lower-bound x)))
+      (make-interval (* (upper-bound x) (lower-bound y))
+                (* (upper-bound x) (upper-bound y)))
+
+    :else
+      (make-interval (min (* (lower-bound x) (upper-bound y)) (* (upper-bound x) (lower-bound y)))
+                (max (* (lower-bound x) (lower-bound y)) (* (upper-bound x) (upper-bound y))))))
+
+
+(defn show-improved-mul[]
+  (let [i1 (make-interval 12.8 13.2)
+        i2 (make-interval 8.7 9.1)
+        i3 (make-interval -9.6 2.0)
+        i4 (make-interval -5.3 11.2)
+        i5 (make-interval -12.8 -3.6)
+        i6 (make-interval -7.2 2.7)
+        i7 (make-interval -9.4 1.5)
+        tests [[i1 i2],[i1 i3],[i1 i4],[i1 i5],[i3 i5],[i5 i5],[i6 i7]]
+        display (fn [[x1 x2]]
+                  (print-interval (mul-interval x1 x2))
+                  (print-interval (mul-interval-op x1 x2))
+                  ) ]
+
+    (map display tests)))
+
+
+
