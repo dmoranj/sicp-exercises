@@ -382,3 +382,9 @@
                ]
     (dorun (map diff pairs))))
 
+;; Exercise 2.15
+(defn last-pair[l]
+  (if (empty? (rest l))
+    (first l)
+    (last-pair (rest l))))
+
