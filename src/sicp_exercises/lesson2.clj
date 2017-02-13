@@ -437,3 +437,15 @@
         (equal-parity? initial (first current)) (recur (cons (first current) result) (rest current))
         :else (recur result (rest current)))))))
 
+;; Exercise 2.21
+(defn square-list1 [items]
+  (if (empty? items)
+    '()
+    (cons (* (first items) (first items)) (square-list1 (rest items)))))
+
+(defn square-list2 [items]
+  (map #(* % %) items))
+
+(defn show-square-list[]
+  (println (square-list1 '(1 2 3 4)))
+  (println (square-list2 '(1 2 3 4))))
