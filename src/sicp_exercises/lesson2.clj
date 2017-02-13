@@ -382,7 +382,7 @@
                ]
     (dorun (map diff pairs))))
 
-;; Exercise 2.15
+;; Exercise 2.17
 (defn last-pair[l]
   (if (empty? (rest l))
     (first l)
@@ -398,3 +398,26 @@
   (if (empty? (rest l))
     l
     (append (revers (rest l)) (list (first l)))))
+
+;; Exercise 2.19
+(def us-coins (list 50 25 10 5 1))
+
+(def uk-coins (list 100 50 20 10 5 2 1 0.5))
+
+(defn no-more? [coin-values]
+  (empty? coin-values))
+
+(defn except-first-denomination [coin-values]
+  (rest coin-values))
+
+(defn first-denomination [coin-values]
+  (first coin-values))
+
+(defn cc [amount coin-values]
+  (cond (== amount 0) 1
+        (or (< amount 0) (no-more? coin-values)) 0
+        :else
+          (+ (cc amount (except-first-denomination coin-values))
+             (cc (- amount (first-denomination coin-values)) coin-values))))
+
+
