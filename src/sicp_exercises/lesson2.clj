@@ -358,4 +358,27 @@
     (println "%1: " (percent i3) " %2: " (percent i1) " %Product: " (percent (mul-interval i3 i1)))
   ))
 
+;; Exercise 2.14
+(defn par1 [r1 r2]
+  (div-interval (mul-interval r1 r2)
+                (add-interval r1 r2)))
+
+(defn par2 [r1 r2]
+  (let [one (make-interval 1 1)]
+    (div-interval one
+                  (add-interval (div-interval one r1)
+                                (div-interval one r2)))))
+
+(defn show-differences[]
+  (let [i1 (make-center-percent 8 0.01)
+        i2 (make-center-percent 6 0.5)
+        i3 (make-center-percent 7 0.02)
+        diff (fn [[x1 x2]]
+              (print-interval (par1 x1 x2))
+              (print-interval (par2 x1 x2))
+              (println "C1: " (center x1) " C2: " (center x2) " CPar1: " (center (par1 x1 x2)) " CPar2: " (center (par2 x1 x2)))
+              (println "%1: " (percent x1) " %2: " (percent x2) " %Par1: " (percent (par1 x1 x2)) " %Par2: " (percent (par2 x1 x2))))
+        pairs [[i1 i2], [i2 i3], [i3 i1]]
+               ]
+    (dorun (map diff pairs))))
 
