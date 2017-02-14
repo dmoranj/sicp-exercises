@@ -598,5 +598,10 @@
   (let [t1 (list 1 (list 2 (list 3 4) 5) (list 6 7))]
     (println "T1 recur: " (tree-map #(* % %) t1))))
 
-
+;; Exercise 2.32
+(defn subsets [s]
+  (if (empty? s)
+    (list '())
+    (let [cdr (subsets (rest s))]
+      (append cdr (map #(cons (first s) %) cdr)))))
 
