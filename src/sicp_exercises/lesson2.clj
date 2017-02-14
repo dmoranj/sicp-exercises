@@ -584,3 +584,19 @@
     (println "T1 recur: " (square-tree-r t1))
     (println "T1 map: " (square-tree-m t1))))
 
+
+;; Exercise 2.31
+(defn tree-map[f t]
+  (cond
+    (not (list? t)) (f t)
+    (empty? t) t
+    :else
+    (cons   (square-tree-r (first t))
+            (square-tree-r (rest t)))))
+
+(defn show-treemap[]
+  (let [t1 (list 1 (list 2 (list 3 4) 5) (list 6 7))]
+    (println "T1 recur: " (tree-map #(* % %) t1))))
+
+
+
