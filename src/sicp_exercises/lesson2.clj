@@ -501,3 +501,57 @@
     (println (fringe x))
     (println (fringe (list x x)))))
 
+;; Exercise 2.29
+(defn make-mobile [left right]
+  (list left right))
+
+(defn make-branch [length structure]
+  (list length structure))
+
+(defn left-branch[m]
+  (first m))
+
+(defn right-branch[m]
+  (second m))
+
+(defn branch-length[b]
+  (first b))
+
+(defn branch-structure[b]
+  (second b))
+
+(defn branch-weight[b]
+  (if (list? (branch-structure b))
+    (total-weight (branch-structure b))
+    (branch-structure b)))
+
+(defn total-weight[m]
+  (+ (branch-weight (left-branch m)) (branch-weight (right-branch m))))
+
+(defn torque[b]
+  (* (branch-length b) (branch-weight b)))
+
+(defn balanced[m]
+  (if (list? m)
+    (let [l (left-branch m)
+          r (right-branch m)]
+      (and (== (torque l) (torque r)) (balanced (branch-structure l)) (balanced (branch-structure r))))
+
+    true))
+
+(defn show-mobiles[]
+  (let [b1 (make-branch 12 8)
+        b2 (make-branch 9 6)
+        m1 (make-mobile b1 b2)
+        b3 (make-branch 7 m1)
+        m2 (make-mobile b3 b1)
+        m3 (make-mobile b1 b1)
+        b4 (make-branch 10 m3)
+        b5 (make-branch 1 160)
+        m4 (make-mobile b4 b5)]
+
+    (println "M2 weight: " (total-weight m2))
+    (println "M2 balanced: " (balanced m2))
+    (println "M3 balanced: " (balanced m3))
+    (println "M4 balanced: " (balanced m4))
+    ))
