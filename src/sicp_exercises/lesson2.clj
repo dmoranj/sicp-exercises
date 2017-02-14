@@ -605,3 +605,25 @@
     (let [cdr (subsets (rest s))]
       (append cdr (map #(cons (first s) %) cdr)))))
 
+;; Basic list operation implementations
+(defn accumulate[op initial sequenc]
+  (if (empty? sequenc)
+    initial
+    (op (first sequenc)
+        (accumulate op initial (rest sequenc)))))
+
+;; Exercise 2.33
+(defn alt-map [p sequenc]
+  (accumulate (fn [x y] (cons (p x) y)) nil sequenc))
+
+(defn alt-append [seq1 seq2]
+  (accumulate cons seq2 seq1))
+
+(defn length [sequenc]
+  (accumulate (fn [current total] (+ total 1)) 0 sequenc))
+
+(defn show-accumulators[]
+  (println (length '(1 2 3 4)))
+  (println (alt-append '(1 2 3) '(4 5 6)))
+  (println (alt-map #(* % %) '(1 2 3 4))))
+
