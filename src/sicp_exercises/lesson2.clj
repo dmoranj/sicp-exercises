@@ -637,3 +637,18 @@
 (defn show-horner-eval[]
   (let [coeffs (list 1 3 0 5 0 1)]
     (println "Horner evaluation at x=2 -> " (horner-eval 2 coeffs))))
+
+;; Exercise 2.35
+(defn get-leaves[t]
+  (if (list? t)
+    (fringe t)
+    (list t)))
+
+(defn count-leaves[t]
+  (accumulate (fn [current total] (+ (length current) total)) 0 (map get-leaves t)))
+
+(defn show-count-leaves []
+  (let [t1 (list 1 (list 2 (list 3 4) 5) (list 6 7))]
+    (println "T1 leaves: " (count-leaves t1))))
+
+
