@@ -651,4 +651,14 @@
   (let [t1 (list 1 (list 2 (list 3 4) 5) (list 6 7))]
     (println "T1 leaves: " (count-leaves t1))))
 
+;; Exercise 2.36
+(defn accumulate-n [op init seqs]
+  (if (empty? (first seqs))
+    '()
+    (cons (accumulate op init (map first seqs))
+          (accumulate-n op init (map rest seqs)))))
 
+
+(defn show-accumulate-n[]
+  (let [t '((1 2 3) (4 5 6) (7 8 9))]
+    (println "Sequence accumulator: " (accumulate-n + 0 s))))
