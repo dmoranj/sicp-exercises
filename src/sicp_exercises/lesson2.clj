@@ -660,5 +660,34 @@
 
 
 (defn show-accumulate-n[]
-  (let [t '((1 2 3) (4 5 6) (7 8 9))]
+  (let [s '((1 2 3) (4 5 6) (7 8 9) (10 11 12))]
     (println "Sequence accumulator: " (accumulate-n + 0 s))))
+
+;; Exercise 2.37
+(defn dot-product [v w]
+  (accumulate + 0 (map * v w)))
+
+(defn matrix-*-vector [m v]
+  (map #(dot-product v %) m))
+
+(defn transpose [mat]
+  (accumulate-n cons
+                '()
+                mat))
+
+(defn matrix-*-matrix [m n]
+  (let [cols (transpose n)]
+    (map (fn [row]
+            (map #(dot-product % row) cols))
+         m)))
+
+(defn show-matrix-operations[]
+  (let [v '(1 2 3)
+        w '(4 5 6)
+        m '((1 2 3)(4 5 6)(7 8 9))]
+    (println "v·w = " (dot-product v w))
+    (println "m·v = " (matrix-*-vector m v))
+    (println "m' = " (transpose m))
+    (println "m·m = " (matrix-*-matrix m m))
+  ))
+
