@@ -486,4 +486,18 @@
     (println (reverse x))
     (println (deep-reverse x))))
 
+;; Exercise 2.28
+(defn fringe[l]
+  (let [head (first l)
+        tail (rest l)]
+    (cond
+      (empty? l) l
+      (not (list? head)) (cons head (fringe tail))
+      :else              (append (fringe head) (fringe tail)))))
+
+(defn show-fringe[]
+  (let [x (list (list 1 2) (list 3 4))]
+    (println x)
+    (println (fringe x))
+    (println (fringe (list x x)))))
 
