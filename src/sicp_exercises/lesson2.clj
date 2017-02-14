@@ -691,3 +691,22 @@
     (println "m·m = " (matrix-*-matrix m m))
   ))
 
+;; Exercise 2.38
+(def fold-right accumulate)
+
+(defn fold-left [op initial sequenc]
+  (loop [result initial
+         res sequenc]
+    (if (empty? res)
+      result
+      (recur (op result (first res))
+             (rest res)))))
+
+(defn show-fold-right[]
+  (println (fold-right / 1 (list 1 2 3)))
+  (println (fold-left / 1 (list 1 2 3)))
+  (println (fold-left + 1 (list 1 2 3)))
+  (println (fold-right + 1 (list 1 2 3)))
+  (println (fold-right list '() (list 1 2 3)))
+  (println (fold-left list '() (list 1 2 3)))
+  )
