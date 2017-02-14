@@ -710,3 +710,17 @@
   (println (fold-right list '() (list 1 2 3)))
   (println (fold-left list '() (list 1 2 3)))
   )
+
+;; Exercise 2.39
+(defn reverse1 [s]
+  (fold-right (fn [x y]
+                  (append y (list x)))
+              nil s))
+
+(defn reverse2 [s]
+  (fold-left (fn [x y] (cons y x)) nil s))
+
+(defn show-reverse-n []
+  (println (reverse1 '(1 2 3 4)))
+  (println (reverse2 '(1 2 3 4))))
+
