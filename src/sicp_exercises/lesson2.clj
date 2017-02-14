@@ -555,3 +555,32 @@
     (println "M3 balanced: " (balanced m3))
     (println "M4 balanced: " (balanced m4))
     ))
+
+;; Exercise 2.30
+(defn square-tree-r[t]
+  (cond
+    (not (list? t)) (* t t)
+    (empty? t) t
+    :else
+      (cons   (square-tree-r (first t))
+              (square-tree-r (rest t)))))
+
+(defn square-tree-m[t]
+  (if (list? t)
+    (map
+        (fn [subt]
+           (cond
+             (not (list? subt)) (* subt subt)
+             (empty? subt) subt
+             :else
+              (append (square-tree-m (first subt))
+                      (square-tree-m (rest subt)))))
+         t)
+    (list (* t t))))
+
+
+(defn show-square-trees[]
+  (let [t1 (list 1 (list 2 (list 3 4) 5) (list 6 7))]
+    (println "T1 recur: " (square-tree-r t1))
+    (println "T1 map: " (square-tree-m t1))))
+
