@@ -627,3 +627,13 @@
   (println (alt-append '(1 2 3) '(4 5 6)))
   (println (alt-map #(* % %) '(1 2 3 4))))
 
+;; Exercise 2.34
+(defn horner-eval [x coefficient-sequence]
+  (accumulate (fn [this-coeff higher-terms]
+                (+ (* x higher-terms) this-coeff))
+              0
+              coefficient-sequence))
+
+(defn show-horner-eval[]
+  (let [coeffs (list 1 3 0 5 0 1)]
+    (println "Horner evaluation at x=2 -> " (horner-eval 2 coeffs))))
