@@ -942,6 +942,15 @@
                                        (make-segment (make-vect 0 1)
                                                      (make-vect 0 0)))))
 
+(def diamond-paint (segments-painter (list
+                                       (make-segment (make-vect 0.5 0)
+                                                     (make-vect 1 0.5))
+                                       (make-segment (make-vect 1 0.5)
+                                                     (make-vect 0.5 1))
+                                       (make-segment (make-vect 0.5 1)
+                                                     (make-vect 0 0.5))
+                                       (make-segment (make-vect 0 0.5)
+                                                     (make-vect 0.5 0)))))
 (defn show-frames[]
   (let [ rects (map #(make-frame (make-vect (+ 20 (* 200 %))  20)
                                  (make-vect 100 0)
@@ -956,15 +965,7 @@
                                                      (make-vect 1 1))
                                        (make-segment (make-vect 0 1)
                                                      (make-vect 1 0))))
-         diamond-paint (segments-painter (list
-                                       (make-segment (make-vect 0.5 0)
-                                                     (make-vect 1 0.5))
-                                       (make-segment (make-vect 1 0.5)
-                                                     (make-vect 0.5 1))
-                                       (make-segment (make-vect 0.5 1)
-                                                     (make-vect 0 0.5))
-                                       (make-segment (make-vect 0 0.5)
-                                                     (make-vect 0.5 0))))]
+         ]
 
          (g/draw (fn []
                    (frame-paint (nth rects 0))
@@ -1065,7 +1066,7 @@
                    ((rotate180 wave) (nth downs 3))
                    ))))
 
-;; Exercise 2.50
+;; Exercise 2.51
 (defn below[painter1 painter2]
   (let [split-point (make-vect 0.0 0.5)
         paint-up (transform-painter painter1
@@ -1101,8 +1102,11 @@
 
 ;; Exercise 2.45
 (defn painter-split [transf1 transf2]
-  (fn [painter]
-    (transf1 painter (transf2 painter painter))))
+  (fn inner-split[painter n]
+    (if (== 0 n)
+      painter
+      (let [smaller (inner-split painter (- n 1))]
+        (transf1 painter (transf2 smaller smaller))))))
 
 (def right-split (painter-split beside below))
 (def up-split (painter-split below beside))
@@ -1113,7 +1117,49 @@
                                (make-vect 0 -400)) (range 0 4))]
 
     (g/draw (fn []
-              ((right-split wave) (nth ups 0))
-              ((up-split wave) (nth ups 1))))))
+              ((right-split wave 10) (nth ups 0))
+              ((up-split wave 10) (nth ups 1))))))
 
+
+;; Exercise 2.52
+(defn corner-split [painter n]
+  (if (== n 0)
+    painter
+    (let [up (up-split painter (- n 1))
+          right (right-split painter (- n 1))
+          top-left (beside up up)
+          bottom-right (below right right)
+          corner (corner-split painter (- n 1))]
+      (beside (below painter top-left)
+              (below bottom-right corner)))))
+
+(defn square-limit [painter n]
+  (let [quarter (corner-split painter n)
+        half (beside (flip-horiz quarter) quarter)]
+    (below (flip-vert half) half)))
+
+(defn alt-square-limit [painter n]
+  (let [quarter (corner-split painter n)
+        half (beside (rotate90 quarter) (rotate180 quarter))]
+    (below (rotate180 half) half)))
+
+(defn show-square-limit[]
+  (let [ ups (map #(make-frame (make-vect (+ 20 (* 300 %))  320)
+                                 (make-vect 300 0)
+                                 (make-vect 0 -300)) (range 0 4))
+
+         downs (map #(make-frame (make-vect (+ 20 (* 300 %))  630)
+                                  (make-vect 300 0)
+                                  (make-vect 0 -300)) (range 0 4))
+
+         wave-fn (square-limit wave 5)
+         diamond-fn (square-limit diamond-paint 5)
+         alt-square-fn (alt-square-limit wave 5)
+         ]
+
+    (g/draw (fn []
+              (wave-fn (nth ups 0))
+              (diamond-fn (nth ups 1))
+              (alt-square-fn (nth downs 0))
+              ))))
 
