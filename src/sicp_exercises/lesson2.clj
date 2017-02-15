@@ -774,4 +774,36 @@
 (defn sum-triples [n s]
   (filter #(is-sum? % s) (unique-triples n)))
 
+;; Exercise 2.42
+(def empty-board '())
+
+(defn adjoin-position[new-row k rest-of-queens]
+  (append rest-of-queens (list new-row)))
+
+(defn safe?[k positions]
+  ;;(println "k= " k "positions= " positions)
+  (let [queen (last positions)
+        rest-of-queens (butlast positions)]
+
+    (loop [current rest-of-queens
+           col (dec k)]
+      (cond
+        (empty? current) true
+        (== (first current) queen) false
+        (or (== (first current) (+ queen col)) (== (first current) (- queen col))) false
+        :else (recur (rest current) (dec col))))))
+
+(defn queens[board-size]
+  (let [queen-cols (fn queen-cols [k]
+                    (if (== k 0)
+                      (list empty-board)
+                      (filter
+                        #(safe? k %)
+                        (flatmap
+                          (fn [rest-of-queens]
+                            (map #(adjoin-position % k rest-of-queens) (enumerate-interval 1 board-size)))
+                          (queen-cols (- k 1))))))]
+
+  (queen-cols board-size)))
+
 
