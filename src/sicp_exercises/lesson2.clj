@@ -758,3 +758,20 @@
 (defn prime-sum-pairs [n]
   (map make-pair-sum
        (filter prime-sum? (unique-pairs n))))
+
+;; Exercise 2.41
+(defn make-triples[s]
+  (let [prefix (first s)
+        rs (second s)]
+    (map #(append prefix (list %)) rs)))
+
+(defn unique-triples[n]
+  (flatmap make-triples (map #(list % (enumerate-interval (inc (second %)) n)) (unique-pairs n))))
+
+(defn is-sum? [triple s]
+  (== s (reduce + triple)))
+
+(defn sum-triples [n s]
+  (filter #(is-sum? % s) (unique-triples n)))
+
+
