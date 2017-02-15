@@ -1,5 +1,6 @@
 (ns sicp-exercises.lesson2
-  (:require [sicp-exercises.lesson1]))
+  (:require [sicp-exercises.lesson1]
+            [sicp-exercises.graphics :as g]))
 
 ;; Common code
 (defn gcd [a b]
@@ -521,6 +522,8 @@
 (defn branch-structure[b]
   (second b))
 
+(declare total-weight)
+
 (defn branch-weight[b]
   (if (list? (branch-structure b))
     (total-weight (branch-structure b))
@@ -841,7 +844,7 @@
 (defn make-frame [origin edge1 edge2]
   (list origin edge1 edge2))
 
-(defn origin-grame [f]
+(defn origin-frame [f]
   (first f))
 
 (defn edge1-frame [f]
@@ -859,3 +862,119 @@
 
 (defn end-segment[v]
   (second v))
+
+;; Exercise 2.49
+(defn frame-coord-map [frame]
+  (fn [v]
+    (add-vect
+      (origin-frame frame)
+      (add-vect (scale-vect (xcor-vect v)
+                            (edge1-frame frame))
+                (scale-vect (ycor-vect v)
+                            (edge2-frame frame))))))
+
+(defn segments-painter [segment-list]
+  (fn painter[frame]
+      (dorun (map (fn liner[segment]
+             (g/draw-line
+               ((frame-coord-map frame) (start-segment segment))
+               ((frame-coord-map frame) (end-segment segment))))
+           segment-list))))
+
+(defn draw-painter[painter frame]
+  (fn drawer[]
+    (painter frame)))
+
+(defn show-frames[]
+  (let [ rects (map #(make-frame (make-vect (+ 20 (* 200 %))  20)
+                                 (make-vect 100 0)
+                                 (make-vect 0 100)) (range 0 4))
+
+         obliqs (map #(make-frame (make-vect (+ 20 (* 200 %))  300)
+                                  (make-vect 100 20)
+                                  (make-vect 20 -100)) (range 0 4))
+
+         frame-paint (segments-painter (list
+                                       (make-segment (make-vect 0 0)
+                                                     (make-vect 1 0))
+                                       (make-segment (make-vect 1 0)
+                                                     (make-vect 1 1))
+                                       (make-segment (make-vect 1 1)
+                                                     (make-vect 0 1))
+                                       (make-segment (make-vect 0 1)
+                                                     (make-vect 0 0))))
+         x-paint (segments-painter (list
+                                       (make-segment (make-vect 0 0)
+                                                     (make-vect 1 1))
+                                       (make-segment (make-vect 0 1)
+                                                     (make-vect 1 0))))
+         diamond-paint (segments-painter (list
+                                       (make-segment (make-vect 0.5 0)
+                                                     (make-vect 1 0.5))
+                                       (make-segment (make-vect 1 0.5)
+                                                     (make-vect 0.5 1))
+                                       (make-segment (make-vect 0.5 1)
+                                                     (make-vect 0 0.5))
+                                       (make-segment (make-vect 0 0.5)
+                                                     (make-vect 0.5 0))))
+
+         wave-paint (segments-painter (list
+                                       (make-segment (make-vect 0 0.7)
+                                                     (make-vect 0.2 0.5))
+                                       (make-segment (make-vect 0.2 0.5)
+                                                     (make-vect 0.35 0.65))
+                                       (make-segment (make-vect 0.35 0.65)
+                                                     (make-vect 0.4 0.6))
+                                       (make-segment (make-vect 0.4 0.6)
+                                                     (make-vect 0.3 0))
+                                       (make-segment (make-vect 0.3 0)
+                                                     (make-vect 0.4 0))
+                                       (make-segment (make-vect 0.4 0)
+                                                     (make-vect 0.5 0.3))
+                                       (make-segment (make-vect 0.5 0.3)
+                                                     (make-vect 0.6 0))
+                                       (make-segment (make-vect 0.6 0)
+                                                     (make-vect 0.7 0))
+                                       (make-segment (make-vect 0.7 0)
+                                                     (make-vect 0.6 0.45))
+                                       (make-segment (make-vect 0.6 0.45)
+                                                     (make-vect 1 0.2))
+                                       (make-segment (make-vect 1 0.2)
+                                                     (make-vect 1 0.3))
+                                       (make-segment (make-vect 1 0.3)
+                                                     (make-vect 0.72 0.7))
+                                       (make-segment (make-vect 0.72 0.7)
+                                                     (make-vect 0.6 0.7))
+                                       (make-segment (make-vect 0.6 0.7)
+                                                     (make-vect 0.65 0.85))
+                                       (make-segment (make-vect 0.65 0.85)
+                                                     (make-vect 0.6 1))
+                                       (make-segment (make-vect 0.6 1)
+                                                     (make-vect 0.45 1))
+                                       (make-segment (make-vect 0.45 1)
+                                                     (make-vect 0.4 0.85))
+                                       (make-segment (make-vect 0.4 0.85)
+                                                     (make-vect 0.45 0.7))
+                                       (make-segment (make-vect 0.45 0.7)
+                                                     (make-vect 0.35 0.7))
+                                       (make-segment (make-vect 0.35 0.7)
+                                                     (make-vect 0.2 0.55))
+                                       (make-segment (make-vect 0.2 0.55)
+                                                     (make-vect 0 0.8))
+                                       (make-segment (make-vect 0 0.8)
+                                                     (make-vect 0 0.7))
+                                        ))
+         ]
+
+         (g/draw (fn []
+                   (frame-paint (nth rects 0))
+                   (frame-paint (nth obliqs 0))
+                   (x-paint (nth rects 1))
+                   (x-paint (nth obliqs 1))
+                   (diamond-paint (nth rects 2))
+                   (diamond-paint (nth obliqs 2))
+                   (wave-paint (nth rects 3))
+                   (wave-paint (nth obliqs 3))
+                   ))))
+
+

@@ -1,14 +1,10 @@
-(ns drawing-tests.core
+(ns sicp-exercises.graphics
   (:require [quil.core :as q]
             [quil.middleware :as m]))
 
-
 (defn setup []
-  (q/frame-rate 30)
-  (q/color-mode :hsb)
-  {})
-
-(defn update-state [state]
+  (q/frame-rate 5)
+  (q/color-mode :rgb)
   {})
 
 (defn draw-state [state]
@@ -17,14 +13,18 @@
   (q/fill 0 255 255)
   (q/ellipse 100 100 100 100))
 
-(defn start-drawing[]
-  (q/defsketch drawing-tests
-  :title "You spin my circle right round"
-  :size [1000 800]
-  :setup setup
-  :update update-state
-  :draw draw-state
-  :features [:keep-on-top]
-  :middleware [m/fun-mode]))
+(defn draw[f]
+  (q/sketch
+    :size [1000 800]
+    :setup setup
+    :draw f
+    :features [:keep-on-top]))
 
-(start-drawing)
+(defn draw-line[x1 x2]
+  (q/stroke 0 0 0)
+  (q/line x1 x2))
+
+(defn test-draw[state]
+  (draw-line '(0 0) '(199 199))
+  )
+
