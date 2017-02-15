@@ -1099,3 +1099,21 @@
                    (let [r9 (rotate90 wave)]
                      ((rotate270 (beside r9 r9)) (nth downs 2)))))))
 
+;; Exercise 2.45
+(defn painter-split [transf1 transf2]
+  (fn [painter]
+    (transf1 painter (transf2 painter painter))))
+
+(def right-split (painter-split beside below))
+(def up-split (painter-split below beside))
+
+(defn show-split-transforms[]
+  (let [ ups (map #(make-frame (make-vect (+ 20 (* 400 %))  520)
+                               (make-vect 400 0)
+                               (make-vect 0 -400)) (range 0 4))]
+
+    (g/draw (fn []
+              ((right-split wave) (nth ups 0))
+              ((up-split wave) (nth ups 1))))))
+
+
