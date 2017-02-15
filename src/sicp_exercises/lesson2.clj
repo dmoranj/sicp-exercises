@@ -521,13 +521,13 @@
 (defn branch-structure[b]
   (second b))
 
-(defn total-weight[m]
-  (+ (branch-weight (left-branch m)) (branch-weight (right-branch m))))
-
 (defn branch-weight[b]
   (if (list? (branch-structure b))
     (total-weight (branch-structure b))
     (branch-structure b)))
+
+(defn total-weight[m]
+  (+ (branch-weight (left-branch m)) (branch-weight (right-branch m))))
 
 (defn torque[b]
   (* (branch-length b) (branch-weight b)))
@@ -805,4 +805,35 @@
 
   (queen-cols board-size)))
 
+;; Exercise 2.46
+(defn make-vect [x y]
+  (list x y))
+
+(defn xcor-vect [v]
+  (first v))
+
+(defn ycor-vect [v]
+  (second v))
+
+(defn add-vect [v1 v2]
+  (make-vect (+ (xcor-vect v1) (xcor-vect v2))
+             (+ (ycor-vect v1) (ycor-vect v2))))
+
+(defn sub-vect [v1 v2]
+  (make-vect (- (xcor-vect v1) (xcor-vect v2))
+             (- (ycor-vect v1) (ycor-vect v2))))
+
+(defn scale-vect [s v]
+  (make-vect (* s (xcor-vect v))
+             (* s (ycor-vect v))))
+
+(defn show-vectors[]
+  (let [v1 (make-vect 2 8)
+        v2 (make-vect 1 9)
+        v3 (make-vect -4 3)]
+    (println "v1= " v1 "v2= " v2 "v3= " v3)
+    (println "v1 + v2= " (add-vect v1 v2))
+    (println "v2 - v1= " (sub-vect v2 v1))
+    (println "5 · v3= " (scale-vect 5 v3))
+  ))
 
