@@ -1065,4 +1065,37 @@
                    ((rotate180 wave) (nth downs 3))
                    ))))
 
-(show-transformations)
+;; Exercise 2.50
+(defn below[painter1 painter2]
+  (let [split-point (make-vect 0.0 0.5)
+        paint-up (transform-painter painter1
+                                    split-point
+                                    (make-vect 1.0 0.5)
+                                    (make-vect 0.0 1.0))
+        paint-down (transform-painter painter2
+                                      (make-vect 0.0 0.0)
+                                      (make-vect 1.0 0.0)
+                                      split-point)]
+    (fn [frame]
+      (paint-up frame)
+      (paint-down frame))))
+
+(defn show-below[]
+  (let [ ups (map #(make-frame (make-vect (+ 20 (* 200 %))  220)
+                                 (make-vect 200 0)
+                                 (make-vect 0 -200)) (range 0 4))
+
+         downs (map #(make-frame (make-vect (+ 20 (* 200 %))  500)
+                                  (make-vect 200 0)
+                                  (make-vect 0 -200)) (range 0 4))]
+    (g/draw (fn []
+                   (dorun
+                     (map #(do
+                             (wave (nth ups %))
+                             (frame-paint (nth ups %))
+                             (frame-paint (nth downs %))) (range 0 4)))
+                   ((beside wave wave) (nth downs 0))
+                   ((below wave wave) (nth downs 1))
+                   (let [r9 (rotate90 wave)]
+                     ((rotate270 (beside r9 r9)) (nth downs 2)))))))
+
