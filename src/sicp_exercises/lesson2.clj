@@ -781,7 +781,6 @@
   (append rest-of-queens (list new-row)))
 
 (defn safe?[k positions]
-  ;;(println "k= " k "positions= " positions)
   (let [queen (last positions)
         rest-of-queens (butlast positions)]
 
