@@ -837,3 +837,16 @@
     (println "5 · v3= " (scale-vect 5 v3))
   ))
 
+;; Exercise 2.47
+(defn make-frame [origin edge1 edge2]
+  (list origin edge1 edge2))
+
+(defn origin-grame [f]
+  (first f))
+
+(defn edge1-frame [f]
+  (second f))
+
+(defn edge2-frame [f]
+  (second (rest f)))
+
