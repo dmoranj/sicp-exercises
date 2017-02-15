@@ -850,3 +850,12 @@
 (defn edge2-frame [f]
   (second (rest f)))
 
+;; Exercise 2.48
+(defn make-segment[v1 v2]
+  (list v1 v2))
+
+(defn start-segment[v]
+  (first v))
+
+(defn end-segment[v]
+  (second v))
