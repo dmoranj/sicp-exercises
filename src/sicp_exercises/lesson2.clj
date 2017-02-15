@@ -885,40 +885,7 @@
   (fn drawer[]
     (painter frame)))
 
-(defn show-frames[]
-  (let [ rects (map #(make-frame (make-vect (+ 20 (* 200 %))  20)
-                                 (make-vect 100 0)
-                                 (make-vect 0 100)) (range 0 4))
-
-         obliqs (map #(make-frame (make-vect (+ 20 (* 200 %))  300)
-                                  (make-vect 100 20)
-                                  (make-vect 20 -100)) (range 0 4))
-
-         frame-paint (segments-painter (list
-                                       (make-segment (make-vect 0 0)
-                                                     (make-vect 1 0))
-                                       (make-segment (make-vect 1 0)
-                                                     (make-vect 1 1))
-                                       (make-segment (make-vect 1 1)
-                                                     (make-vect 0 1))
-                                       (make-segment (make-vect 0 1)
-                                                     (make-vect 0 0))))
-         x-paint (segments-painter (list
-                                       (make-segment (make-vect 0 0)
-                                                     (make-vect 1 1))
-                                       (make-segment (make-vect 0 1)
-                                                     (make-vect 1 0))))
-         diamond-paint (segments-painter (list
-                                       (make-segment (make-vect 0.5 0)
-                                                     (make-vect 1 0.5))
-                                       (make-segment (make-vect 1 0.5)
-                                                     (make-vect 0.5 1))
-                                       (make-segment (make-vect 0.5 1)
-                                                     (make-vect 0 0.5))
-                                       (make-segment (make-vect 0 0.5)
-                                                     (make-vect 0.5 0))))
-
-         wave-paint (segments-painter (list
+(def wave (segments-painter (list
                                        (make-segment (make-vect 0 0.7)
                                                      (make-vect 0.2 0.5))
                                        (make-segment (make-vect 0.2 0.5)
@@ -963,8 +930,41 @@
                                                      (make-vect 0 0.8))
                                        (make-segment (make-vect 0 0.8)
                                                      (make-vect 0 0.7))
-                                        ))
-         ]
+                                        )))
+
+(def frame-paint (segments-painter (list
+                                       (make-segment (make-vect 0 0)
+                                                     (make-vect 1 0))
+                                       (make-segment (make-vect 1 0)
+                                                     (make-vect 1 1))
+                                       (make-segment (make-vect 1 1)
+                                                     (make-vect 0 1))
+                                       (make-segment (make-vect 0 1)
+                                                     (make-vect 0 0)))))
+
+(defn show-frames[]
+  (let [ rects (map #(make-frame (make-vect (+ 20 (* 200 %))  20)
+                                 (make-vect 100 0)
+                                 (make-vect 0 100)) (range 0 4))
+
+         obliqs (map #(make-frame (make-vect (+ 20 (* 200 %))  300)
+                                  (make-vect 100 20)
+                                  (make-vect 20 -100)) (range 0 4))
+
+         x-paint (segments-painter (list
+                                       (make-segment (make-vect 0 0)
+                                                     (make-vect 1 1))
+                                       (make-segment (make-vect 0 1)
+                                                     (make-vect 1 0))))
+         diamond-paint (segments-painter (list
+                                       (make-segment (make-vect 0.5 0)
+                                                     (make-vect 1 0.5))
+                                       (make-segment (make-vect 1 0.5)
+                                                     (make-vect 0.5 1))
+                                       (make-segment (make-vect 0.5 1)
+                                                     (make-vect 0 0.5))
+                                       (make-segment (make-vect 0 0.5)
+                                                     (make-vect 0.5 0))))]
 
          (g/draw (fn []
                    (frame-paint (nth rects 0))
@@ -973,8 +973,96 @@
                    (x-paint (nth obliqs 1))
                    (diamond-paint (nth rects 2))
                    (diamond-paint (nth obliqs 2))
-                   (wave-paint (nth rects 3))
-                   (wave-paint (nth obliqs 3))
+                   (wave (nth rects 3))
+                   (wave (nth obliqs 3))
                    ))))
 
 
+;; Exercise 2.50
+(defn transform-painter [painter origin corner1 corner2]
+  (fn [frame]
+    (let [m (frame-coord-map frame)
+          new-origin (m origin)]
+      (painter
+        (make-frame new-origin
+                    (sub-vect (m corner1) new-origin)
+                    (sub-vect (m corner2) new-origin))))))
+
+(defn flip-vert [painter]
+  (transform-painter painter
+                     (make-vect 0.0 1.0)
+                     (make-vect 1.0 1.0)
+                     (make-vect 0.0 0.0)))
+
+(defn shrink-to-upper-right [painter]
+  (transform-painter painter
+                     (make-vect 0.5 0.5)
+                     (make-vect 1.0 0.5)
+                     (make-vect 0.5 1.0)))
+
+(defn rotate90 [painter]
+  (transform-painter painter
+                     (make-vect 1.0 0.0)
+                     (make-vect 1.0 1.0)
+                     (make-vect 0.0 0.0)))
+
+(defn squash-inwards [painter]
+  (transform-painter painter
+                     (make-vect 0.0 0.0)
+                     (make-vect 0.65 0.35)
+                     (make-vect 0.35 0.65)))
+
+(defn flip-horiz [painter]
+  (transform-painter painter
+                     (make-vect 1.0 0.0)
+                     (make-vect 0.0 0.0)
+                     (make-vect 1.0 1.0)))
+
+(defn rotate180 [painter]
+  (transform-painter painter
+                     (make-vect 1.0 1.0)
+                     (make-vect 0.0 1.0)
+                     (make-vect 1.0 0.0)))
+
+(defn rotate270 [painter]
+  (transform-painter painter
+                     (make-vect 0.0 1.0)
+                     (make-vect 0.0 0.0)
+                     (make-vect 1.0 1.0)))
+
+(defn beside [painter1 painter2]
+  (let [split-point (make-vect 0.5 0.0)
+        paint-left (transform-painter painter1
+                                      (make-vect 0.0 0.0)
+                                      split-point
+                                      (make-vect 0.0 1.0))
+        paint-right (transform-painter painter2
+                                       split-point
+                                       (make-vect 1.0 0.0)
+                                       (make-vect 0.5 1.0))]
+    (fn [frame]
+      (paint-left frame)
+      (paint-right frame))))
+
+
+(defn show-transformations[]
+  (let [ ups (map #(make-frame (make-vect (+ 20 (* 200 %))  220)
+                                 (make-vect 200 0)
+                                 (make-vect 0 -200)) (range 0 4))
+
+         downs (map #(make-frame (make-vect (+ 20 (* 200 %))  500)
+                                  (make-vect 200 0)
+                                  (make-vect 0 -200)) (range 0 4))]
+    (g/draw (fn []
+                   (dorun
+                     (map #(do
+                             (wave (nth ups %))
+                             (frame-paint (nth ups %))
+                             (frame-paint (nth downs %))) (range 0 4)))
+                   ((rotate90 wave) (nth downs 0))
+                   ((rotate270 wave) (nth downs 1))
+                   ((flip-horiz wave) (nth downs 2))
+                   ((rotate180 wave) (nth downs 3))
+                   ))))
+
+(show-transformations)
