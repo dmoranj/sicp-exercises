@@ -1,4 +1,5 @@
-(ns sicp-exercises.lesson2)
+(ns sicp-exercises.lesson2
+  (:require [sicp-exercises.lesson1]))
 
 ;; Common code
 (defn gcd [a b]
@@ -520,13 +521,13 @@
 (defn branch-structure[b]
   (second b))
 
+(defn total-weight[m]
+  (+ (branch-weight (left-branch m)) (branch-weight (right-branch m))))
+
 (defn branch-weight[b]
   (if (list? (branch-structure b))
     (total-weight (branch-structure b))
     (branch-structure b)))
-
-(defn total-weight[m]
-  (+ (branch-weight (left-branch m)) (branch-weight (right-branch m))))
 
 (defn torque[b]
   (* (branch-length b) (branch-weight b)))
@@ -724,3 +725,36 @@
   (println (reverse1 '(1 2 3 4)))
   (println (reverse2 '(1 2 3 4))))
 
+
+;; Exercise 2.40
+(defn enumerate-interval [low high]
+  (if (> low high)
+    '()
+    (cons low (enumerate-interval (+ low 1) high))))
+
+(defn flatmap [proc sequ]
+  (accumulate append nil (map proc sequ)))
+
+(defn prime-sum [pair]
+  (sicp-exercises.lesson1/prime? (+ (first pair) (second pair))))
+
+(defn make-pairs [s]
+  (let [rs (reverse s)
+        h (first rs)
+        cdr (rest rs)]
+    (map #(list % h) cdr)))
+
+(defn unique-pairs [n]
+  (flatmap
+    make-pairs
+    (map #(enumerate-interval 1 %) (enumerate-interval 1 n))))
+
+(defn make-pair-sum [pair]
+  (list (first pair) (second pair) (+ (first pair) (second pair))))
+
+(defn prime-sum? [pair]
+  (sicp-exercises.lesson1/prime? (+ (first pair) (second pair))))
+
+(defn prime-sum-pairs [n]
+  (map make-pair-sum
+       (filter prime-sum? (unique-pairs n))))
