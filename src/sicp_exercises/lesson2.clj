@@ -1169,4 +1169,10 @@
         (= item (first x)) x
         :else (memq item (rest x))))
 
-
+;; Exercise 2.54
+(defn equal?[o1 o2]
+  (cond
+    (and (not (list? o1)) (not (list? o2))) (= o1 o2)
+    (and (list? o1) (list? o2) (empty? o1) (empty? o2)) true
+    (and (list? o1) (list? o2)) (and (equal? (first o1) (first o2)) (equal? (rest o1) (rest o2)))
+    :else false))
