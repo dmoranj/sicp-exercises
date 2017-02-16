@@ -1177,7 +1177,7 @@
     (and (list? o1) (list? o2)) (and (equal? (first o1) (first o2)) (equal? (rest o1) (rest o2)))
     :else false))
 
-;; Exercise 2.56
+;; Exercise 2.56/2.57
 (defn variable? [x]
   (symbol? x))
 
@@ -1209,7 +1209,12 @@
   (second s))
 
 (defn augend [s]
-  (second (rest s)))
+  (let [res (rest (rest s))]
+    (cond
+      (and (list? res) (== (count res) 1)) (first res)
+      (list? res) (append '(+) res)
+      :else res
+      )))
 
 (defn product? [x]
   (and (list? x) (= (first x) '*)))
@@ -1218,7 +1223,12 @@
   (second p))
 
 (defn multiplicand [p]
-  (second (rest p)))
+ (let [res (rest (rest p))]
+    (cond
+      (and (list? res) (== (count res) 1)) (first res)
+      (list? res) (append '(*) res)
+      :else res
+      )))
 
 (defn make-exponentiation [m1 m2]
   (cond
@@ -1265,7 +1275,6 @@
   (println (deriv '(* x y) 'x))
   (println (deriv '(* (* x y) (+ x 3)) 'x))
   (println (deriv '(** x y) 'x)))
-
 
 ;; Exercise 2.58
 (defn alt-make-sum [a1 a2]
@@ -1322,3 +1331,5 @@
   (println (alt-deriv '(x + 3) 'x))
   (println (alt-deriv '(x * y) 'x))
   (println (alt-deriv '((x * y) * (x * 3)) 'x)))
+
+
