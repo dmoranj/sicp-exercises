@@ -1348,7 +1348,7 @@
 
 (defn adjoin-set [x uset]
   (if (element-of-set? x set)
-    x
+    uset
     (cons x uset)))
 
 (defn intersection-set [set1 set2]
@@ -1415,3 +1415,53 @@
     (println (dup-union-set s1 s3))
     ))
 
+;; Exercise 2.61/2.62
+(defn element-of-oset? [x oset]
+  (cond
+    (empty? oset) false
+    (== x (first oset)) true
+    (< x (first oset)) false
+    :else (element-of-oset? x (rest oset))))
+
+(defn intersection-oset [set1 set2]
+  (if (or (empty? set1) (empty? set2))
+    '()
+    (let [x1 (first set1)
+          x2 (first set2)]
+      (cond
+        (== x1 x2)
+          (cons x1 (intersection-oset (rest set1) (rest set2)))
+        (< x1 x2)
+          (intersection-oset (rest set1) set2)
+        :else
+          (intersection-oset set1 (rest set2))))))
+
+(defn adjoin-oset [x oset]
+  (cond
+    (empty? oset) (list x)
+    (> (first oset) x) (cons x oset)
+    :else (cons (first oset) (adjoin-oset x (rest oset)))))
+
+(defn union-oset [set1 set2]
+  (cond
+    (empty? set1) set2
+    (empty? set2) set1
+    :else
+      (let [x1 (first set1)
+            x2 (first set2)]
+        (cond
+          (== x1 x2)
+            (cons x1 (union-oset (rest set1) (rest set2)))
+          (< x1 x2)
+            (cons x1 (union-oset (rest set1) set2))
+          :else
+            (cons x2 (union-oset set1 (rest set2)))))))
+
+(defn show-oset[]
+  (println (adjoin-oset 5 '(3 4)))
+  (println (adjoin-oset 3 '()))
+  (println (adjoin-oset 6 '(8 9 10)))
+  (println (adjoin-oset 9 '(7 8 10)))
+
+  (println (union-oset '(1 2 6) '(5 6 9 12)))
+  (println (union-oset '(2 6 17) '(1 5 6 9 12))))
