@@ -1465,3 +1465,86 @@
 
   (println (union-oset '(1 2 6) '(5 6 9 12)))
   (println (union-oset '(2 6 17) '(1 5 6 9 12))))
+
+;; Exercise 2.63
+(defn entry [tree]
+  (first tree))
+
+(defn left-branch [tree]
+  (-> tree rest first))
+
+(defn right-branch [tree]
+  (-> tree rest rest first))
+
+(defn make-tree [entry left right]
+  (list entry left right))
+
+(defn element-of-tset? [x tset]
+  (cond
+    (empty? tset) false
+    (== x (entry tset)) true
+    (< x (entry tset))
+      (element-of-tset? x (left-branch tset))
+    (> x (entry tset))
+      (element-of-tset? x (right-branch tset))))
+
+(defn adjoin-tset [x tset]
+  (cond
+    (empty? tset) (make-tree x '() '())
+    (== x (entry tset)) tset
+    (< x (entry tset))
+      (make-tree (entry tset)
+                 (adjoin-tset x (left-branch tset))
+                 (right-branch tset))
+    (> x (entry tset))
+      (make-tree (entry tset)
+                 (left-branch tset)
+                 (adjoin-tset x (right-branch tset)))))
+
+(defn tree->list-1 [tree]
+  (if (empty? tree)
+    '()
+    (append (tree->list-1 (left-branch tree))
+            (cons (entry tree)
+                  (tree->list-1 (right-branch tree))))))
+
+(defn tree->list-2 [tree]
+  (let [copy-to-list (fn copy-to-list[tree result-list]
+                       (if (empty? tree)
+                         result-list
+                         (copy-to-list (left-branch tree)
+                                       (cons (entry tree)
+                                             (copy-to-list (right-branch tree)
+                                                           result-list)))))]
+    (copy-to-list tree '())))
+
+(defn show-trees[]
+  (let [t1 (make-tree 5
+                      (make-tree 3
+                                 (make-tree 1 '() '())
+                                 '())
+                      (make-tree 9
+                                 (make-tree 7 '() '())
+                                 (make-tree 11 '() '())))
+        t2 (make-tree 3
+                      (make-tree 1 '() '())
+                      (make-tree 7
+                                 (make-tree 5 '() '())
+                                 (make-tree 9
+                                            '()
+                                            (make-tree 11 '() '()))))
+        t3 (make-tree 7
+                      (make-tree 3
+                                 (make-tree 1 '() '())
+                                 (make-tree 5 '() '()))
+                      (make-tree 9
+                                 '()
+                                 (make-tree 11 '() '())))]
+    (println "tree->list-1(t1): " (tree->list-1 t1))
+    (println "tree->list-2(t1): " (tree->list-2 t1))
+    (println "tree->list-1(t2): " (tree->list-1 t2))
+    (println "tree->list-2(t2): " (tree->list-2 t2))
+    (println "tree->list-1(t3): " (tree->list-1 t3))
+    (println "tree->list-2(t3): " (tree->list-2 t3))
+    ))
+
