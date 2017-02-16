@@ -1338,3 +1338,45 @@
   (println (alt-deriv '(x * y) 'x))
   (println (alt-deriv '((x * y) * (x * 3)) 'x))
   (println (alt-deriv '((3 * x) + (5 * y) + (10 * (x * y))) 'x)))
+
+;; Exercise 2.59
+(defn element-of-set? [x uset]
+  (cond
+    (empty? uset) false
+    (equal? x (first uset)) true
+    :else (element-of-set? x (rest uset))))
+
+(defn adjoin-set [x uset]
+  (if (element-of-set? x set)
+    x
+    (cons x uset)))
+
+(defn intersection-set [set1 set2]
+  (cond
+    (or (empty? set1) (empty? set2)) '()
+    (element-of-set? (first set1) set2)
+      (cons (first set1)
+            (intersection-set (rest set1) set2))
+    :else
+      (intersection-set (rest set1) set2)))
+
+(defn union-set [set1 set2]
+  (cond
+    (empty? set1) set2
+    (element-of-set? (first set1) set2)
+      (union-set (rest set1) set2)
+    :else
+      (cons (first set1)
+            (union-set (rest set1) set2))))
+
+(defn show-sets[]
+  (let [s1 '(1 5 2)
+        s2 '(5 9 8 2)
+        s3 '(7 3 9 1)]
+    (println (element-of-set? 2 s1))
+    (println (element-of-set? 3 s2))
+    (println (intersection-set s1 s2))
+    (println (union-set s1 s2))
+    (println (union-set s1 s3))
+    ))
+
