@@ -1163,3 +1163,10 @@
               (alt-square-fn (nth downs 0))
               ))))
 
+;; Exercise 2.53
+(defn memq [item x]
+  (cond (empty? x) false
+        (= item (first x)) x
+        :else (memq item (rest x))))
+
+
