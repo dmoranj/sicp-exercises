@@ -1380,3 +1380,38 @@
     (println (union-set s1 s3))
     ))
 
+;; Exercise 2.60
+(defn dup-element-of-set? [x uset]
+  (cond
+    (empty? uset) false
+    (equal? x (first uset)) true
+    :else (element-of-set? x (rest uset))))
+
+(defn dup-adjoin-set [x uset]
+  (cons x uset))
+
+(defn dup-intersection-set [set1 set2]
+  (cond
+    (or (empty? set1) (empty? set2)) '()
+    (dup-element-of-set? (first set1) set2)
+      (cons (first set1)
+            (dup-intersection-set (rest set1) set2))
+    :else
+      (dup-intersection-set (rest set1) set2)))
+
+(defn dup-union-set [set1 set2]
+  (if (empty? set1)
+    set2
+    (cons (first set1) (dup-union-set (rest set1) set2))))
+
+(defn show-dup-sets[]
+  (let [s1 '(1 5 2)
+        s2 '(5 9 8 2)
+        s3 '(7 3 9 1)]
+    (println (dup-element-of-set? 2 s1))
+    (println (dup-element-of-set? 3 s2))
+    (println (dup-intersection-set s1 s2))
+    (println (dup-union-set s1 s2))
+    (println (dup-union-set s1 s3))
+    ))
+
