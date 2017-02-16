@@ -1293,13 +1293,19 @@
     :else (list m1 '* m2)))
 
 (defn alt-sum? [x]
-  (and (list? x) (= (second x) '+)))
+  (and (list? x) (> (count (filter #(= '+ %) x)) 0)))
 
 (defn alt-addend [s]
-  (first s))
+  (let [result (first (split-with #(not (= '+ %)) s))]
+    (if (and (seq? result) (== 1 (count result)))
+      (first result)
+      result)))
 
 (defn alt-augend [s]
-  (second (rest s)))
+  (let [result (rest (first (rest (split-with #(not (= '+ %)) s))))]
+    (if (and (seq? result) (== 1 (count result)))
+      (first result)
+      result)))
 
 (defn alt-product? [x]
   (and (list? x) (= (second x) '*)))
@@ -1330,6 +1336,5 @@
 (defn show-alt-deriv[]
   (println (alt-deriv '(x + 3) 'x))
   (println (alt-deriv '(x * y) 'x))
-  (println (alt-deriv '((x * y) * (x * 3)) 'x)))
-
-
+  (println (alt-deriv '((x * y) * (x * 3)) 'x))
+  (println (alt-deriv '((3 * x) + (5 * y) + (10 * (x * y))) 'x)))
