@@ -1176,3 +1176,93 @@
     (and (list? o1) (list? o2) (empty? o1) (empty? o2)) true
     (and (list? o1) (list? o2)) (and (equal? (first o1) (first o2)) (equal? (rest o1) (rest o2)))
     :else false))
+
+;; Exercise 2.56
+(defn variable? [x]
+  (symbol? x))
+
+(defn same-variable? [v1 v2]
+  (and (variable? v1) (variable? v2) (= v1 v2)))
+
+(defn =number? [exp numb]
+  (and (number? exp) (= exp numb)))
+
+(defn make-sum [a1 a2]
+  (cond
+    (=number? a1 0) a2
+    (=number? a2 0) a1
+    (and (number? a1) (number? a2)) (+ a1 a2)
+    :else (list '+ a1 a2)))
+
+(defn make-product [m1 m2]
+  (cond
+    (or (=number? m1 0) (=number? m2 0)) 0
+    (=number? m1 1) m2
+    (=number? m2 1) m1
+    (and (number? m1) (number? m2)) (* m1 m2)
+    :else (list '+ m1 m2)))
+
+(defn sum? [x]
+  (and (list? x) (= (first x) '+)))
+
+(defn addend [s]
+  (second s))
+
+(defn augend [s]
+  (second (rest s)))
+
+(defn product? [x]
+  (and (list? x) (= (first x) '*)))
+
+(defn multiplier [p]
+  (second p))
+
+(defn multiplicand [p]
+  (second (rest p)))
+
+(defn make-exponentiation [m1 m2]
+  (cond
+    (=number? m1 0) 0
+    (=number? m2 0) 1
+    (=number? m2 1) m1
+    (and (number? m1) (number? m2)) (Math/pow m1 m2)
+    :else (list '** m1 m2)))
+
+(defn base [x]
+  (second x))
+
+(defn exponent [x]
+  (second (rest x)))
+
+(defn exponentiation? [x]
+  (and (list? x) (= (first x) '**)))
+
+(defn deriv [exp var]
+  (cond (number? exp) 0
+        (variable? exp)
+          (if (same-variable? exp var) 1 0)
+        (sum? exp)
+          (make-sum
+                    (deriv (addend exp) var)
+                    (deriv (augend exp) var))
+        (product? exp)
+          (make-sum
+                    (make-product (multiplier exp)
+                                  (deriv (multiplicand exp) var))
+                    (make-product (deriv (multiplier exp) var)
+                                  (multiplicand exp)))
+        (exponentiation? exp)
+          (make-product
+                    (exponent exp)
+                    (make-exponentiation (base exp)
+                                         (make-sum (exponent exp)
+                                                   -1)))
+        :else
+          (println "Derivation error: unknown expressions")))
+
+(defn show-deriv[]
+  (println (deriv '(+ x 3) 'x))
+  (println (deriv '(* x y) 'x))
+  (println (deriv '(* (* x y) (+ x 3)) 'x))
+  (println (deriv '(** x y) 'x)))
+
