@@ -1200,7 +1200,7 @@
     (=number? m1 1) m2
     (=number? m2 1) m1
     (and (number? m1) (number? m2)) (* m1 m2)
-    :else (list '+ m1 m2)))
+    :else (list '* m1 m2)))
 
 (defn sum? [x]
   (and (list? x) (= (first x) '+)))
@@ -1266,3 +1266,59 @@
   (println (deriv '(* (* x y) (+ x 3)) 'x))
   (println (deriv '(** x y) 'x)))
 
+
+;; Exercise 2.58
+(defn alt-make-sum [a1 a2]
+  (cond
+    (=number? a1 0) a2
+    (=number? a2 0) a1
+    (and (number? a1) (number? a2)) (+ a1 a2)
+    :else (list a1 '+ a2)))
+
+(defn alt-make-product [m1 m2]
+  (cond
+    (or (=number? m1 0) (=number? m2 0)) 0
+    (=number? m1 1) m2
+    (=number? m2 1) m1
+    (and (number? m1) (number? m2)) (* m1 m2)
+    :else (list m1 '* m2)))
+
+(defn alt-sum? [x]
+  (and (list? x) (= (second x) '+)))
+
+(defn alt-addend [s]
+  (first s))
+
+(defn alt-augend [s]
+  (second (rest s)))
+
+(defn alt-product? [x]
+  (and (list? x) (= (second x) '*)))
+
+(defn alt-multiplier [p]
+  (first p))
+
+(defn alt-multiplicand [p]
+  (second (rest p)))
+
+(defn alt-deriv [exp var]
+  (cond (number? exp) 0
+        (variable? exp)
+          (if (same-variable? exp var) 1 0)
+        (alt-sum? exp)
+          (alt-make-sum
+                    (alt-deriv (alt-addend exp) var)
+                    (alt-deriv (alt-augend exp) var))
+        (alt-product? exp)
+          (alt-make-sum
+                    (alt-make-product (alt-multiplier exp)
+                                      (alt-deriv (alt-multiplicand exp) var))
+                    (alt-make-product (alt-deriv (alt-multiplier exp) var)
+                                      (alt-multiplicand exp)))
+        :else
+          (println "Derivation error: unknown expressions")))
+
+(defn show-alt-deriv[]
+  (println (alt-deriv '(x + 3) 'x))
+  (println (alt-deriv '(x * y) 'x))
+  (println (alt-deriv '((x * y) * (x * 3)) 'x)))
