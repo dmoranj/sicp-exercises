@@ -1595,3 +1595,84 @@
     (println (tree->list-1 (intersection-tset t1 t2)))
     (println (tree->list-1 (intersection-tset t2 t3)))
   ))
+
+;; Exercise 2.67
+(defn make-leaf [sym weight]
+  (list 'leaf sym weight))
+
+(defn leaf? [object]
+  (and (list? object) (= (first object) 'leaf)))
+
+(defn symbol-leaf [x]
+  (second x))
+
+(defn weight-leaf [x]
+  (second (rest x)))
+
+(defn left-code-branch [tree]
+  (first tree))
+
+(defn right-code-branch [tree]
+  (second tree))
+
+(defn symbols [tree]
+  (if (leaf? tree)
+      (list (symbol-leaf tree))
+      (second (rest tree))))
+
+(defn weight [tree]
+  (if (leaf? tree)
+      (weight-leaf tree)
+      (-> tree rest rest second)))
+
+(defn make-code-tree [left right]
+  (list left
+        right
+        (append (symbols left) (symbols right))
+        (+ (weight left) (weight right))))
+
+(defn choose-branch [bit branch]
+  (cond
+    (== bit 0) (left-code-branch branch)
+    (== bit 1) (right-code-branch branch)
+    :else (throw (Exception. "bad bit --CHOOSE BRANCH"))))
+
+(defn decode [bits tree]
+  (let [decode-1 (fn decode-1 [bits current-branch]
+                   (if (empty? bits)
+                     '()
+                     (let [next-branch (choose-branch (first bits) current-branch)]
+                       (if (leaf? next-branch)
+                         (cons (symbol-leaf next-branch)
+                               (decode-1 (rest bits) tree))
+                         (decode-1 (rest bits) next-branch)))))]
+    (decode-1 bits tree)))
+
+(defn adjoin-h-set [x hset]
+  (cond
+    (empty? hset) (list x)
+    (< (weight x) (weight (first hset))) (cons x hset)
+    :else
+      (cons (first hset)
+            (adjoin-h-set x (rest hset)))))
+
+(defn make-leaf-set [pairs]
+  (if (empty? pairs)
+    '()
+    (let [pair (first pairs)]
+      (adjoin-h-set (make-leaf (first pair)
+                               (second pair))
+                    (make-leaf-set (rest pairs))))))
+
+(defn show-huffman[]
+  (let [sample-tree (make-code-tree (make-leaf 'A 4)
+                                    (make-code-tree (make-leaf 'B 2)
+                                                    (make-code-tree (make-leaf 'D 1)
+                                                                    (make-leaf 'C 1))))
+        sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0)]
+    (println "Decoded message: " (decode sample-message sample-tree))))
+
+
+
+
+
