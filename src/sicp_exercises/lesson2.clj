@@ -1548,3 +1548,32 @@
     (println "tree->list-2(t3): " (tree->list-2 t3))
     ))
 
+;; Exercise 2.64
+
+;; Partial tree works by dividing the ordered list by its half; being an ordered list
+;; all the elements in the left half should be lower than the middle element, and all
+;; the elements in the right one greater. Both parts are ordered lists as well, so the
+;; process can be repeated on each side to get ordered subtrees. The tree must be balanced
+;; as, in each iteration of the function (each execution for a subtree) all the remaining
+;, elements are split in half, assigning each half to a different branch of the subtree.
+(defn partial-tree [elts n]
+  (if (= n 0)
+    (cons '() elts)
+    (let [left-size (quot (- n 1) 2)
+          left-result (partial-tree elts left-size)
+          left-tree (first left-result)
+          non-left-elts (rest left-result)
+          right-size (- n (+ left-size 1))
+          this-entry (first non-left-elts)
+          right-result (partial-tree (rest non-left-elts) right-size)
+          right-tree (first right-result)
+          remaining-elts (rest right-result)]
+      (cons (make-tree this-entry left-tree right-tree) remaining-elts))))
+
+(defn list->tree [elements]
+  (first (partial-tree elements (length elements))))
+
+(defn show-list-tree[]
+  (let [t4 '(1 3 5 7 9 11)]
+    (println "t4: " (list->tree t4))))
+
