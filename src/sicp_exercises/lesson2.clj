@@ -1704,3 +1704,32 @@
     (println "Encoded message: " (encode '(A D A B B C A) sample-tree))
     ))
 
+;; Exercise 2.69
+(defn successive-merge[pairs]
+  (cond
+    (empty? pairs) '()
+    (== (count pairs) 1) (first pairs)
+    :else
+      (successive-merge (cons   (make-code-tree (second pairs)
+                                                (first pairs))
+                                (rest (rest pairs))))))
+
+
+(defn generate-huffman-tree [pairs]
+  (successive-merge (make-leaf-set pairs)))
+
+(defn show-huffman-generation[]
+  (let [pairs '( (A 4) (B 2) (D 1) (C 1))
+        sample-tree (make-code-tree (make-leaf 'A 4)
+                                    (make-code-tree (make-leaf 'B 2)
+                                                    (make-code-tree (make-leaf 'D 1)
+                                                                    (make-leaf 'C 1))))
+        huffman (generate-huffman-tree pairs)
+        sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0)
+        ]
+    (println "Huffman tree: " huffman)
+    (println "Sample  tree: " sample-tree)
+    (println "Decoded message: " (decode sample-message huffman))
+    (println "Encoded message: " (encode '(A D A B B C A) huffman))
+    ))
+
