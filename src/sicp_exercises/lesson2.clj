@@ -1733,3 +1733,17 @@
     (println "Encoded message: " (encode '(A D A B B C A) huffman))
     ))
 
+;; Exercise 2.70
+(defn show-1950-rock-code[]
+  (let [pairs '((WAH 1) (BOOM 1) (A 2) (GET 2) (JOB 2) (SHA 3) (YIP 9) (NA 16))
+        huffman (generate-huffman-tree pairs)
+        message '(GET A JOB
+                      SHA NA NA NA NA NA NA NA NA
+                      GET A JOB
+                      SHA NA NA NA NA NA NA NA NA
+                      WAH YIP YIP YIP YIP YIP YIP YIP YIP YIP
+                      SHA BOOM)
+        encoded (encode message huffman)]
+    (println "Encoded message: " encoded)
+    (println "Length: " (count encoded))
+    (println "Expected length with fixed code: (2^log8)*N " (* (count message) 3))))
