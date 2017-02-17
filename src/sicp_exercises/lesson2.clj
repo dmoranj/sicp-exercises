@@ -1577,3 +1577,21 @@
   (let [t4 '(1 3 5 7 9 11)]
     (println "t4: " (list->tree t4))))
 
+;; Exercise 2.65
+(defn union-tset[set1 set2]
+  (let [ol (union-oset (tree->list-1 set1) (tree->list-1 set2))]
+    (list->tree ol)))
+
+(defn intersection-tset[set1 set2]
+  (let [ol (intersection-oset (tree->list-1 set1) (tree->list-1 set2))]
+    (list->tree ol)))
+
+(defn show-tsets[]
+  (let [t1 (list->tree '(1 4 6 8))
+        t2 (list->tree '(2 4 7 9 12))
+        t3 (list->tree '(1 2 3 4))]
+    (println (tree->list-1 (union-tset t1 t2)))
+    (println (tree->list-1 (union-tset t2 t3)))
+    (println (tree->list-1 (intersection-tset t1 t2)))
+    (println (tree->list-1 (intersection-tset t2 t3)))
+  ))
