@@ -1672,7 +1672,35 @@
         sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0)]
     (println "Decoded message: " (decode sample-message sample-tree))))
 
+;; Exercise 2.68
+(declare encode)
 
+(defn encode-symbol [sym tree]
+  (let [find-symbol (fn find-symbol[subtree result]
+                      (cond
+                        (and (leaf? subtree) (= (symbol-leaf subtree) sym)) result
+                        (leaf? subtree) '()
+                        :else (append (find-symbol (left-code-branch subtree)
+                                                   (cons 0 result))
+                                      (find-symbol (right-code-branch subtree)
+                                                   (cons 1 result)))))]
+    (if (list? sym)
+      (encode sym tree)
+      (reverse (find-symbol tree '())))))
 
+(defn encode [message tree]
+  (if (empty? message)
+    '()
+    (append (encode-symbol (first message) tree)
+            (encode-symbol (rest message) tree))))
 
+(defn show-encode-decode[]
+  (let [sample-tree (make-code-tree (make-leaf 'A 4)
+                                    (make-code-tree (make-leaf 'B 2)
+                                                    (make-code-tree (make-leaf 'D 1)
+                                                                    (make-leaf 'C 1))))
+        sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0)]
+    (println "Decoded message: " (decode sample-message sample-tree))
+    (println "Encoded message: " (encode '(A D A B B C A) sample-tree))
+    ))
 
