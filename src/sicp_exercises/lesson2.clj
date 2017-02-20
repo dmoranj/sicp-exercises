@@ -1852,3 +1852,20 @@
   (println (get-salary 'engineering (get-record 'engineering 5163)))
   (println (find-employee-record 2734 ['marketing 'engineering])))
 
+;; Exercise 2.75
+(defn make-from-mag-ang [m a]
+  (fn dispatch [op]
+    (cond
+      (= op 'real-part) (* m (Math/cos a))
+      (= op 'imag-part) (* m (Math/sin a))
+      (= op 'magnitude) m
+      (= op 'angle) a
+      :else
+        (throw (Exception. "Unknown Op -- MAKE-FROM-MAG-ANG")))))
+
+(defn show-make-from-mag-ang[]
+  (let [complex-n (make-from-mag-ang 5 (/ Math/PI 4))]
+    (println (complex-n 'magnitude))
+    (println (complex-n 'angle))
+    (println (complex-n 'real-part))
+    (println (complex-n 'imag-part))))
