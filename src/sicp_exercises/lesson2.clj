@@ -1794,3 +1794,34 @@
 (defn show-deriv-dd[]
   (println (deriv-dd '(+ (* 3 x) (* x y)) 'x))
   (println (deriv-dd '(+ (* 3 (** x 3)) (* x y)) 'x)))
+
+;; Exercise 2.74
+(def engineering-division-file (hash-map
+                               5163 (hash-map :name "Jhon Doe" :job "Analyst")
+                               7254 (hash-map :name "Jane Doe" :job "Developer")))
+
+(def marketing-division-file [ '(1412 "Jackie Doe" "Boss")
+                               '(2734 "Tobby" "Mascot")])
+
+(defn get-record-engineering [employee-id]
+  (get engineering-division-file employee-id))
+
+(defn get-record-marketing [employee-id]
+  (loop [search-file marketing-division-file]
+    (cond
+      (empty? search-file) nil
+      (== (-> search-file first first) employee-id) (first search-file)
+      :else (recur (rest search-file)))))
+
+(def division-table
+  (hash-map
+    'engineering (hash-map
+                   'get-record get-record-engineering)
+    'marketing (hash-map
+                   'get-record get-record-marketing)))
+
+(defn division-table-get [division operation]
+  (get (get division-table division) operation))
+
+(defn get-record [division employee-id]
+  ((division-table-get division 'get-record) employee-id))
