@@ -1869,3 +1869,140 @@
     (println (complex-n 'angle))
     (println (complex-n 'real-part))
     (println (complex-n 'imag-part))))
+
+;; Exercise 2.79
+(def operation-table (atom {}))
+
+(defn put-operation [operation types func]
+  (let [updater (fn [current-value]
+                  (assoc-in current-value [operation types] func))]
+    (swap! operation-table updater)))
+
+(defn get-operation [operation types]
+  (get-in @operation-table [operation types]))
+
+(defn clear-operations []
+  (let [cleaner (fn [current-value]
+                  {})]
+    (swap! operation-table cleaner)))
+
+(defn attach-tag [type-tag contents]
+  (cons type-tag contents))
+
+(defn type-tag [datum]
+  (if (coll? datum)
+    (first datum)
+    (throw (Exception. "Bad tagged datum -- TYPE-TAG"))))
+
+(defn contents [datum]
+  (if (coll? datum)
+    (rest datum)
+    (throw (Exception. "Bad tagged datum -- CONTENTS"))))
+
+(defn apply-generic [op & args]
+   (let [type-tags (map type-tag args)
+         proc (get-operation op type-tags)]
+    (if proc
+      (apply proc (map contents args))
+      (throw (Exception. "No methof for these types" (list op type-tags))))))
+
+(defn install-rational-package []
+  (let [numer (fn [x] (first x))
+        denom (fn [x] (second x))
+        make-rat (fn [n d]
+                   (let [g (gcd n d)]
+                     (list (/ n g) (/ d g))))
+        add-rat (fn [x y]
+                  (make-rat (+ (* (numer x) (denom y))
+                               (* (numer y) (denom x)))
+                            (* (denom x) (denom y))))
+        sub-rat (fn [x y]
+                  (make-rat (- (* (numer x) (denom y))
+                               (* (numer y) (denom x)))
+                            (* (denom x) (denom y))))
+        mul-rat (fn [x y]
+                  (make-rat (* (numer x) (numer y))
+                            (* (denom x) (denom y))))
+        div-rat (fn [x y]
+                  (make-rat (* (numer x) (denom y))
+                            (* (denom x) (numer y))))
+        tag (fn [x]
+              (attach-tag 'rational x))]
+    (put-operation 'add
+                   '(rational rational)
+                   (fn [x y]
+                     (tag (add-rat x y))))
+
+    (put-operation 'sub
+                   '(rational rational)
+                   (fn [x y]
+                     (tag (sub-rat x y))))
+
+    (put-operation 'mul
+                   '(rational rational)
+                   (fn [x y]
+                     (tag (mul-rat x y))))
+
+    (put-operation 'div
+                   '(rational rational)
+                   (fn [x y]
+                     (tag (div-rat x y))))
+
+    (put-operation 'make
+                   'rational
+                   (fn [n d]
+                     (tag (make-rat n d))))
+    'done))
+
+(defn make-rational [n d]
+  ((get-operation 'make 'rational) n d))
+
+(defn install-scheme-number-package[]
+  (let [tag (fn [x]
+              (attach-tag 'scheme-number (list x)))]
+    (put-operation 'add
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (println "x: " x "y: " y)
+                     (tag (+ x y))))
+    (put-operation 'sub
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (tag (- x y))))
+    (put-operation 'mul
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (tag (* x y))))
+    (put-operation 'div
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (tag (/ x y))))
+
+    (put-operation 'make
+                   'scheme-number
+                   (fn [x]
+                     (tag x)))
+    'done))
+
+(defn make-scheme-number [n]
+  ((get-operation 'make 'scheme-number) n))
+
+(defn add [x y] (apply-generic 'add x y))
+(defn sub [x y] (apply-generic 'sub x y))
+(defn mul [x y] (apply-generic 'mul x y))
+(defn div [x y] (apply-generic 'div x y))
+
+(defn show-generic-arithmetic[]
+  (let [sn1 (make-scheme-number 9)
+        sn2 (make-scheme-number 15)
+        rat1 (make-rational 2 3)
+        rat2 (make-rational 1 2)]
+
+    (install-rational-package)
+    (install-scheme-number-package)
+
+    (println (add sn1 sn2))
+    (println (mul sn1 sn2))
+    (println (add rat1 rat2))
+    (println (mul rat1 rat2))
+    ))
