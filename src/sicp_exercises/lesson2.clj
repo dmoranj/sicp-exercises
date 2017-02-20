@@ -1948,6 +1948,16 @@
                    (fn [x y]
                      (tag (div-rat x y))))
 
+    (put-operation 'eq
+                   '(rational rational)
+                   (fn [x y]
+                     (and (= (numer x) (numer y)) (= (denom x) (denom y)))))
+
+    (put-operation 'zero
+                   '(rational)
+                   (fn [x]
+                     (== (numer x) 0)))
+
     (put-operation 'make
                    'rational
                    (fn [n d]
@@ -1978,6 +1988,16 @@
                    (fn [[x] [y]]
                      (tag (/ x y))))
 
+    (put-operation 'eq
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (== x y)))
+
+    (put-operation 'zero
+                   '(scheme-number)
+                   (fn [[x]]
+                     (== x 0)))
+
     (put-operation 'make
                    'scheme-number
                    (fn [x]
@@ -1991,6 +2011,8 @@
 (defn sub [x y] (apply-generic 'sub x y))
 (defn mul [x y] (apply-generic 'mul x y))
 (defn div [x y] (apply-generic 'div x y))
+(defn =eq? [x y] (apply-generic 'eq x y))
+(defn is-zero? [x] (apply-generic 'zero x))
 
 (defn show-generic-arithmetic[]
   (let [sn1 (make-scheme-number 9)
@@ -2005,4 +2027,13 @@
     (println (mul sn1 sn2))
     (println (add rat1 rat2))
     (println (mul rat1 rat2))
+    (println (=eq? rat1 rat2))
+    (println (=eq? rat1 rat1))
+    (println (=eq? sn1 sn2))
+    (println (=eq? sn2 sn2))
+    (println (is-zero? sn2))
+    (println (is-zero? rat1))
+    (println (is-zero? (make-scheme-number 0)))
+    (println (is-zero? (make-rational 0 8)))
     ))
+
