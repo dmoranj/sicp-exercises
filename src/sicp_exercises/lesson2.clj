@@ -1747,3 +1747,50 @@
     (println "Encoded message: " encoded)
     (println "Length: " (count encoded))
     (println "Expected length with fixed code: (2^log8)*N " (* (count message) 3))))
+
+;; Exercise 2.73
+(declare deriv-dd)
+
+(defn deriv-prod [operands var]
+  (let [exp (cons '* operands)]
+    (make-sum
+      (make-product (multiplier exp)
+                    (deriv-dd (multiplicand exp) var))
+      (make-product (deriv-dd (multiplier exp) var)
+                    (multiplicand exp)))))
+
+(defn deriv-sum [operands var]
+  (let [exp (cons '+ operands)]
+    (make-sum (deriv-dd (addend exp) var)
+              (deriv-dd (augend exp) var))))
+
+(defn deriv-power[operands var]
+  (let [exp (cons '** operands)]
+    (make-product
+      (exponent exp)
+      (make-exponentiation (base exp)
+                           (make-sum (exponent exp)
+                                     -1)))))
+
+(def deriv-table
+  (hash-map
+    'deriv (hash-map '+ deriv-sum '* deriv-prod '** deriv-power)))
+
+(defn deriv-table-get [operation operator]
+  (get (get deriv-table operation) operator))
+
+(defn operator [exp]
+  (first exp))
+
+(defn operands [exp]
+  (rest exp))
+
+(defn deriv-dd [exp var]
+  (cond
+    (number? exp) 0
+    (variable? exp) (if (same-variable? exp var) 1 0)
+    :else ((deriv-table-get 'deriv (operator exp)) (operands exp) var)))
+
+(defn show-deriv-dd[]
+  (println (deriv-dd '(+ (* 3 x) (* x y)) 'x))
+  (println (deriv-dd '(+ (* 3 (** x 3)) (* x y)) 'x)))
