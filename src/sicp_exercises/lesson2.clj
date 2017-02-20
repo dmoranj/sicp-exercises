@@ -1797,14 +1797,17 @@
 
 ;; Exercise 2.74
 (def engineering-division-file (hash-map
-                               5163 (hash-map :name "Jhon Doe" :job "Analyst")
-                               7254 (hash-map :name "Jane Doe" :job "Developer")))
+                               5163 (hash-map :name "Jhon Doe" :job "Analyst" :salary 120000)
+                               7254 (hash-map :name "Jane Doe" :job "Developer" :salary 100000)))
 
-(def marketing-division-file [ '(1412 "Jackie Doe" "Boss")
-                               '(2734 "Tobby" "Mascot")])
+(def marketing-division-file [ '(1412 "Jackie Doe" "Boss" 160000)
+                               '(2734 "Tobby" "Mascot" "Some cookies")])
 
 (defn get-record-engineering [employee-id]
   (get engineering-division-file employee-id))
+
+(defn get-salary-engineering [employee]
+  (:salary employee))
 
 (defn get-record-marketing [employee-id]
   (loop [search-file marketing-division-file]
@@ -1813,15 +1816,39 @@
       (== (-> search-file first first) employee-id) (first search-file)
       :else (recur (rest search-file)))))
 
+(defn get-salary-marketing [employee]
+  (-> employee rest rest rest first))
+
 (def division-table
   (hash-map
     'engineering (hash-map
-                   'get-record get-record-engineering)
+                   'get-record get-record-engineering
+                   'get-salary get-salary-engineering)
     'marketing (hash-map
-                   'get-record get-record-marketing)))
+                   'get-record get-record-marketing
+                   'get-salary get-salary-marketing)))
 
 (defn division-table-get [division operation]
   (get (get division-table division) operation))
 
 (defn get-record [division employee-id]
   ((division-table-get division 'get-record) employee-id))
+
+(defn get-salary [division employee]
+  ((division-table-get division 'get-salary) employee))
+
+(defn find-employee-record[employee-id divisions]
+  (loop [pending-divisions divisions]
+    (if (empty? pending-divisions)
+      nil
+      (let [division (first pending-divisions)
+            employee-record (get-record division employee-id)]
+        (if (nil? employee-record)
+          (recur (rest pending-divisions))
+          employee-record)))))
+
+(defn show-corp[]
+  (println (get-salary-marketing (get-record 'marketing 2734)))
+  (println (get-salary 'engineering (get-record 'engineering 5163)))
+  (println (find-employee-record 2734 ['marketing 'engineering])))
+
