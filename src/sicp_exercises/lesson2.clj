@@ -2233,25 +2233,6 @@
   (put-coercion 'scheme-number 'rational scheme-number->rational)
   (put-coercion 'rational 'complex rational->complex))
 
-(defn apply-generic [op & args]
-  (let [type-tags (map type-tag args)
-        proc (get-operation op type-tags)]
-    (if proc
-      (apply proc (map contents args))
-      (if (= (count args) 2)
-        (let [type1 (first type-tags)
-              type2 (second type-tags)
-              a1 (first args)
-              a2 (second args)
-              t1->t2 (get-coercion type1 type2)
-              t2->t1 (get-coercion type2 type1)]
-          (cond
-            (= type1 type2) (throw (Exception. (str "No coercion for arguments of the same type " (reduce str (interpose ", " type-tags)))))
-            t1->t2 (apply-generic op (t1->t2 a1) a2)
-            t2->t1 (apply-generic op a1 (t2->t1 a2))
-            :else (throw (Exception. (str "No method for these types: " (reduce str (interpose ", " type-tags)))))))
-        (throw (Exception. "No coercion method for the passed types"))))))
-
 (defn show-coercions[]
   (do
     (install-polar-package)
@@ -2307,20 +2288,23 @@
       (= (first res) v) i
       :else (recur (inc i) (rest res)))))
 
-(defn generate-tower-comparator [accesibility key-list]
-  (fn tower-down? [type1 type2]
-    (let [x (index-of key-list type1)
-          y (index-of key-list type2)]
-      (== (get-in accesibility [y x]) 0))))
+(defn type-list[]
+  (let [origin-types (set (keys @coercion-table))
+        target-types (set (flatmap keys (map @coercion-table (keys @coercion-table))))]
+    (vec (clojure.set/union origin-types target-types))))
+
+(defn generate-tower-comparator []
+  (let [key-list (type-list)
+        coertion-matrix (generate-coertion-matrix key-list)
+        accesibility (close-matrix coertion-matrix (count key-list))]
+    (fn tower-down? [type1 type2]
+      (let [x (index-of key-list type1)
+            y (index-of key-list type2)]
+        (== (get-in accesibility [y x]) 0)))))
 
 (defn get-coertion-tower[]
-  (let [origin-types (set (keys @coercion-table))
-        target-types (set (flatmap keys (map @coercion-table (keys @coercion-table))))
-        key-list (vec (clojure.set/union origin-types target-types))
-        coertion-matrix (generate-coertion-matrix key-list)
-        accesibility (close-matrix coertion-matrix (count key-list))
-        tower-down? (generate-tower-comparator accesibility key-list)
-        ]
+  (let [ key-list (type-list)
+         tower-down? (generate-tower-comparator) ]
     (sort tower-down? key-list)
   ))
 
@@ -2356,3 +2340,46 @@
       (println (raise rat1))
       (println (raise comp3))
       )))
+
+;; Exercise 2.84
+(defn is-higher[type1 type2]
+  (let [ key-list (type-list)
+         tower-down? (generate-tower-comparator) ]
+    (tower-down? type1 type2)))
+
+(defn apply-generic [op & args]
+  (let [type-tags (map type-tag args)
+        proc (get-operation op type-tags)]
+    (if proc
+      (apply proc (map contents args))
+      (if (= (count args) 2)
+        (let [tower-down? (generate-tower-comparator)
+              type1 (first type-tags)
+              type2 (second type-tags)
+              a1 (first args)
+              a2 (second args)]
+          (cond
+            (tower-down? type1 type2) (apply-generic op (raise a1) a2)
+            (tower-down? type2 type1) (apply-generic op a1 (raise a2))
+            (= type1 type2) (throw (Exception. (str "No method found for equal types: " (reduce str (interpose ", " type-tags)))))
+            :else (throw (Exception. (str "No method for these types: " (reduce str (interpose ", " type-tags)))))))
+        (throw (Exception. "No coercion method for the passed types"))))))
+
+(defn show-raise[]
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+
+    (let [sn1 (make-scheme-number 9)
+          rat1 (make-rational 2 3)
+          comp1 (make-complex-from-real-imag 5 3)
+          ]
+      (println (add sn1 comp1))
+      (println (add sn1 rat1))
+      (println (add comp1 rat1))
+      )))
+
