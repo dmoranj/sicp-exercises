@@ -1879,12 +1879,7 @@
 (defn attach-tag [type-tag contents]
   (cons type-tag contents))
 
-(defn apply-generic [op & args]
-   (let [type-tags (map type-tag args)
-         proc (get-operation op type-tags)]
-    (if proc
-      (apply proc (map contents args))
-      (throw (Exception. "No methof for these types" (list op type-tags))))))
+(declare apply-generic)
 
 (defn install-rectangular-package[]
   (let [real-part (fn [z] (first z))
@@ -2037,6 +2032,10 @@
                    (fn [x y]
                      (and (= (numer x) (numer y)) (= (denom x) (denom y)))))
 
+    (put-operation 'numer '(rational) numer)
+
+    (put-operation 'denom '(rational) denom)
+
     (put-operation 'zero
                    '(rational)
                    (fn [x]
@@ -2047,6 +2046,9 @@
                    (fn [n d]
                      (tag (make-rat n d))))
     'done))
+
+(defn denom [z] (apply-generic 'denom z))
+(defn numer [z] (apply-generic 'numer z))
 
 (defn make-rational [n d]
   ((get-operation 'make 'rational) n d))
@@ -2201,3 +2203,66 @@
       (println (add comp1 comp2))
       (println (mul comp1 comp3))
     )))
+
+;; Coercion system
+(def coercion-table (atom {}))
+
+(defn put-coercion [type1 type2 coercion]
+  (let [updater (fn [current-value]
+                  (assoc-in current-value [type1 type2] coercion))]
+    (swap! coercion-table updater)))
+
+(defn get-coercion [type1 type2]
+  (get-in @coercion-table [type1 type2]))
+
+(defn scheme-number->complex [n]
+  (make-complex-from-real-imag (first (contents n)) 0))
+
+(defn rational->complex [n]
+  (make-complex-from-real-imag (/ (numer n) (denom n)) 0))
+
+(defn install-coercions[]
+  (put-coercion 'scheme-number 'complex scheme-number->complex)
+  (put-coercion 'rational 'complex rational->complex))
+
+(defn apply-generic [op & args]
+  (let [type-tags (map type-tag args)
+        proc (get-operation op type-tags)]
+    (if proc
+      (apply proc (map contents args))
+      (if (= (count args) 2)
+        (let [type1 (first type-tags)
+              type2 (second type-tags)
+              a1 (first args)
+              a2 (second args)
+              t1->t2 (get-coercion type1 type2)
+              t2->t1 (get-coercion type2 type1)]
+          (cond
+            t1->t2 (apply-generic op (t1->t2 a1) a2)
+            t2->t1 (apply-generic op a1 (t2->t1 a2))
+            :else (throw (Exception. "No method for these types"))))
+        (throw (Exception. "No coercion method for the passed types"))))))
+
+(defn show-coercions[]
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+
+    (let [sn1 (make-scheme-number 9)
+          sn2 (make-scheme-number 15)
+          rat1 (make-rational 2 3)
+          rat2 (make-rational 1 2)
+          comp1 (make-complex-from-real-imag 5 3)
+          comp2 (make-complex-from-real-imag -2 10)
+          comp3 (make-complex-from-mag-ang 10 1.5)
+          ]
+      (println (rational->complex rat1))
+      (println (add rat1 comp1))
+      (println (scheme-number->complex sn1))
+      (println (sub sn1 comp2))
+      )))
+
