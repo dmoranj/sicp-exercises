@@ -1870,6 +1870,105 @@
     (println (complex-n 'real-part))
     (println (complex-n 'imag-part))))
 
+;; Complex number support functions
+(defn type-tag [datum]
+  (if (coll? datum)
+    (first datum)
+    (throw (Exception. "Bad tagged datum -- TYPE-TAG"))))
+
+(defn attach-tag [type-tag contents]
+  (cons type-tag contents))
+
+(defn apply-generic [op & args]
+   (let [type-tags (map type-tag args)
+         proc (get-operation op type-tags)]
+    (if proc
+      (apply proc (map contents args))
+      (throw (Exception. "No methof for these types" (list op type-tags))))))
+
+(defn install-rectangular-package[]
+  (let [real-part (fn [z] (first z))
+
+        imag-part (fn [z] (second z))
+
+        make-from-real-imag (fn [x y] (list x y))
+
+        magnitude (fn [z]
+                    (Math/sqrt (+ (Math/pow (real-part z) 2)
+                                  (Math/pow (imag-part z) 2))))
+
+        angle (fn [z]
+                (Math/atan2 (imag-part z) (real-part z)))
+
+        make-from-mag-ang (fn [r a]
+                            (list (* r (Math/cos a)) (* r (Math/sin a))))
+        tag (fn [z]
+              (attach-tag 'rectangular z))]
+
+    (put-operation 'real-part '(rectangular) real-part)
+
+    (put-operation 'imag-part '(rectangular) imag-part)
+
+    (put-operation 'magnitude '(rectangular) magnitude)
+
+    (put-operation 'angle '(rectangular) angle)
+
+    (put-operation 'make-from-real-imag
+                   'rectangular
+                   (fn [x y]
+                     (tag (make-from-real-imag x y))))
+
+    (put-operation 'make-from-mag-ang
+                   'rectangular
+                   (fn [r a]
+                     (tag (make-from-mag-ang r a))))
+
+    'done))
+
+(defn install-polar-package[]
+  (let [magnitude (fn [z] (first z))
+
+        angle (fn [z] (second z))
+
+        make-from-mag-ang (fn [r a] (list r a))
+
+        real-part (fn [z]
+                    (* (magnitude z) (Math/cos (angle z))))
+
+        imag-part (fn [z]
+                    (* (magnitude z) (Math/sin (angle z))))
+
+        make-from-real-imag (fn [x y]
+                              (list (Math/sqrt (+ (Math/pow x 2) (Math/pow y 2)))
+                                    (Math/atan2 y x)))
+
+        tag (fn [x] (attach-tag 'polar x))]
+
+    (put-operation 'real-part '(polar) real-part)
+
+    (put-operation 'imag-part '(polar) imag-part)
+
+    (put-operation 'magnitude '(polar) magnitude)
+
+    (put-operation 'angle '(polar) angle)
+
+    (put-operation 'make-from-real-imag
+                   'polar
+                   (fn [x y]
+                     (tag (make-from-real-imag x y))))
+
+    (put-operation 'make-from-mag-ang
+                   'polar
+                   (fn [r a]
+                     (tag (make-from-mag-ang r a))))
+
+    'done))
+
+(defn real-part [z] (apply-generic 'real-part z))
+(defn imag-part [z] (apply-generic 'imag-part z))
+(defn magnitude [z] (apply-generic 'magnitude z))
+(defn angle [z] (apply-generic 'angle z))
+
 ;; Exercise 2.79
 (def operation-table (atom {}))
 
@@ -1886,25 +1985,10 @@
                   {})]
     (swap! operation-table cleaner)))
 
-(defn attach-tag [type-tag contents]
-  (cons type-tag contents))
-
-(defn type-tag [datum]
-  (if (coll? datum)
-    (first datum)
-    (throw (Exception. "Bad tagged datum -- TYPE-TAG"))))
-
 (defn contents [datum]
   (if (coll? datum)
     (rest datum)
     (throw (Exception. "Bad tagged datum -- CONTENTS"))))
-
-(defn apply-generic [op & args]
-   (let [type-tags (map type-tag args)
-         proc (get-operation op type-tags)]
-    (if proc
-      (apply proc (map contents args))
-      (throw (Exception. "No methof for these types" (list op type-tags))))))
 
 (defn install-rational-package []
   (let [numer (fn [x] (first x))
@@ -2007,6 +2091,77 @@
 (defn make-scheme-number [n]
   ((get-operation 'make 'scheme-number) n))
 
+(defn install-complex-package[]
+  (let [make-from-real-imag (fn [x y]
+                              ((get-operation 'make-from-real-imag 'rectangular) x y))
+        make-from-mag-ang (fn [r a]
+                            ((get-operation 'make-from-mag-ang 'polar) r a))
+
+        add-complex (fn [z1 z2]
+                      (make-from-real-imag (+ (real-part z1) (real-part z2))
+                                           (+ (imag-part z1) (imag-part z2))))
+
+        sub-complex (fn [z1 z2]
+                      (make-from-real-imag (- (real-part z1) (real-part z2))
+                                           (- (imag-part z1) (imag-part z2))))
+
+        mul-complex (fn [z1 z2]
+                      (make-from-mag-ang (* (magnitude z1) (magnitude z2))
+                                         (+ (angle z1) (angle z2))))
+
+        div-complex (fn [z1 z2]
+                      (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
+                                         (- (angle z1) (angle z2))))
+
+        tag (fn [z]
+              (attach-tag 'complex z))]
+
+    (put-operation 'add
+                   '(complex complex)
+                   (fn [z1 z2]
+                     (tag (add-complex z1 z2))))
+
+    (put-operation 'sub
+                   '(complex complex)
+                   (fn [z1 z2]
+                     (tag (sub-complex z1 z2))))
+
+    (put-operation 'mul
+                   '(complex complex)
+                   (fn [z1 z2]
+                     (tag (mul-complex z1 z2))))
+
+    (put-operation 'div
+                   '(complex complex)
+                   (fn [z1 z2]
+                     (tag (div-complex z1 z2))))
+
+    (put-operation 'make-from-real-imag
+                   'complex
+                   (fn [x y]
+                     (tag (make-from-real-imag x y))))
+
+    (put-operation 'make-from-mag-ang
+                   'complex
+                   (fn [r a]
+                     (tag (make-from-mag-ang r a))))
+
+    (put-operation 'real-part '(complex) real-part)
+
+    (put-operation 'imag-part '(complex) imag-part)
+
+    (put-operation 'magnitude '(complex) magnitude)
+
+    (put-operation 'angle '(complex) angle)
+
+    'done))
+
+(defn make-complex-from-real-imag [x y]
+  ((get-operation 'make-from-real-imag 'complex) x y))
+
+(defn make-complex-from-mag-ang [r a]
+  ((get-operation 'make-from-mag-ang 'complex) r a))
+
 (defn add [x y] (apply-generic 'add x y))
 (defn sub [x y] (apply-generic 'sub x y))
 (defn mul [x y] (apply-generic 'mul x y))
@@ -2015,25 +2170,34 @@
 (defn is-zero? [x] (apply-generic 'zero x))
 
 (defn show-generic-arithmetic[]
-  (let [sn1 (make-scheme-number 9)
-        sn2 (make-scheme-number 15)
-        rat1 (make-rational 2 3)
-        rat2 (make-rational 1 2)]
-
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
     (install-rational-package)
     (install-scheme-number-package)
+    (install-complex-package)
 
-    (println (add sn1 sn2))
-    (println (mul sn1 sn2))
-    (println (add rat1 rat2))
-    (println (mul rat1 rat2))
-    (println (=eq? rat1 rat2))
-    (println (=eq? rat1 rat1))
-    (println (=eq? sn1 sn2))
-    (println (=eq? sn2 sn2))
-    (println (is-zero? sn2))
-    (println (is-zero? rat1))
-    (println (is-zero? (make-scheme-number 0)))
-    (println (is-zero? (make-rational 0 8)))
-    ))
+    (let [sn1 (make-scheme-number 9)
+          sn2 (make-scheme-number 15)
+          rat1 (make-rational 2 3)
+          rat2 (make-rational 1 2)
+          comp1 (make-complex-from-real-imag 5 3)
+          comp2 (make-complex-from-real-imag -2 10)
+          comp3 (make-complex-from-mag-ang 10 1.5)
+          ]
 
+      (println (add sn1 sn2))
+      (println (mul sn1 sn2))
+      (println (add rat1 rat2))
+      (println (mul rat1 rat2))
+      (println (=eq? rat1 rat2))
+      (println (=eq? rat1 rat1))
+      (println (=eq? sn1 sn2))
+      (println (=eq? sn2 sn2))
+      (println (is-zero? sn2))
+      (println (is-zero? rat1))
+      (println (is-zero? (make-scheme-number 0)))
+      (println (is-zero? (make-rational 0 8)))
+      (println (add comp1 comp2))
+      (println (mul comp1 comp3))
+    )))
