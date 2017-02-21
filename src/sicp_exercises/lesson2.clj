@@ -403,8 +403,6 @@
       result
       (recur (cons (first current) result) (rest current)))))
 
-(revers '(1 2 3 4 5))
-
 ;; Exercise 2.19
 (def us-coins (list 50 25 10 5 1))
 
@@ -1871,6 +1869,21 @@
     (println (complex-n 'imag-part))))
 
 ;; Complex number support functions
+(def operation-table (atom {}))
+
+(defn put-operation [operation types func]
+  (let [updater (fn [current-value]
+                  (assoc-in current-value [operation types] func))]
+    (swap! operation-table updater)))
+
+(defn get-operation [operation types]
+  (get-in @operation-table [operation types]))
+
+(defn clear-operations []
+  (let [cleaner (fn [current-value]
+                  {})]
+    (swap! operation-table cleaner)))
+
 (defn type-tag [datum]
   (if (coll? datum)
     (first datum)
@@ -1965,21 +1978,6 @@
 (defn angle [z] (apply-generic 'angle z))
 
 ;; Exercise 2.79
-(def operation-table (atom {}))
-
-(defn put-operation [operation types func]
-  (let [updater (fn [current-value]
-                  (assoc-in current-value [operation types] func))]
-    (swap! operation-table updater)))
-
-(defn get-operation [operation types]
-  (get-in @operation-table [operation types]))
-
-(defn clear-operations []
-  (let [cleaner (fn [current-value]
-                  {})]
-    (swap! operation-table cleaner)))
-
 (defn contents [datum]
   (if (coll? datum)
     (rest datum)
@@ -2078,9 +2076,6 @@
                    '(scheme-number scheme-number)
                    (fn [[x] [y]]
                      (tag (Math/pow x y))))
-;;                    (fn exponentiation [[x] [y]]
-;;                      (println "x= " x "y= " y)
-;;                      (tag (Math/pow x y))))
 
     (put-operation 'eq
                    '(scheme-number scheme-number)
@@ -2228,11 +2223,14 @@
 (defn scheme-number->complex [n]
   (make-complex-from-real-imag (first (contents n)) 0))
 
+(defn scheme-number->rational [n]
+  (make-rational (first (contents n)) 1))
+
 (defn rational->complex [n]
   (make-complex-from-real-imag (/ (numer n) (denom n)) 0))
 
 (defn install-coercions[]
-  (put-coercion 'scheme-number 'complex scheme-number->complex)
+  (put-coercion 'scheme-number 'rational scheme-number->rational)
   (put-coercion 'rational 'complex rational->complex))
 
 (defn apply-generic [op & args]
@@ -2279,3 +2277,82 @@
       (println (exp sn1 sn3))
       )))
 
+;; Exercise 2.83
+(defn generate-coertion-matrix [type-list]
+  (map vals
+       (reduce
+          #(assoc-in %1 [(first %2) (second %2)] (if (nil? (-> %2 rest rest first)) 0 1))
+          []
+          (for [x (range 0 (count type-list)) y (range 0 (count type-list))]
+            [x y (get-coercion (nth type-list x) (nth type-list y))]
+            ))))
+
+(defn matrix-or-matrix [m1 m2]
+  (vec (map #(vec (map + %1 %2)) m1 m2)))
+
+(defn close-matrix [mat n]
+  (loop [max-iter n
+         result mat
+         power mat]
+    (let [new-power (matrix-*-matrix power mat)]
+      (if (== max-iter 0)
+        result
+        (recur (dec max-iter) (matrix-or-matrix result new-power) new-power)))))
+
+(defn index-of[sequ v]
+  (loop [i 0
+         res sequ]
+    (cond
+      (empty? res) nil
+      (= (first res) v) i
+      :else (recur (inc i) (rest res)))))
+
+(defn generate-tower-comparator [accesibility key-list]
+  (fn tower-down? [type1 type2]
+    (let [x (index-of key-list type1)
+          y (index-of key-list type2)]
+      (== (get-in accesibility [y x]) 0))))
+
+(defn get-coertion-tower[]
+  (let [origin-types (set (keys @coercion-table))
+        target-types (set (flatmap keys (map @coercion-table (keys @coercion-table))))
+        key-list (vec (clojure.set/union origin-types target-types))
+        coertion-matrix (generate-coertion-matrix key-list)
+        accesibility (close-matrix coertion-matrix (count key-list))
+        tower-down? (generate-tower-comparator accesibility key-list)
+        ]
+    (sort tower-down? key-list)
+  ))
+
+(defn raise[z]
+  (let [tower (get-coertion-tower)
+        current-type (type-tag z)
+        internal-raise (fn [upper-types]
+                        (let [upper-type (first upper-types)
+                              t1->t2 (get-coercion current-type upper-type)]
+                          (if t1->t2
+                            (t1->t2 z)
+                            z)))]
+    (loop [remaining-types tower]
+      (cond
+        (empty? remaining-types) z
+        (= current-type (first remaining-types)) (internal-raise (rest remaining-types))
+        :else (recur (rest remaining-types))))))
+
+(defn show-tower[]
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+
+    (let [sn1 (make-scheme-number 9)
+          rat1 (make-rational 2 3)
+          comp3 (make-complex-from-mag-ang 10 1.5)
+          ]
+      (println (raise sn1))
+      (println (raise rat1))
+      (println (raise comp3))
+      )))
