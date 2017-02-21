@@ -2383,3 +2383,20 @@
       (println (add comp1 rat1))
       )))
 
+;; Exercise 2.84
+(defn drop-complex->rational[z]
+  (let [r (rationalize (real-part z))]
+    (if (= (type r) 'clojure.lang.Ratio)
+      (make-rational (numerator r) (denominator r))
+      (make-rational r 1)
+      )))
+
+(defn drop-rational->scheme-number[z]
+  (make-scheme-number (quot (numer z) (denom z))))
+
+(defn install-project-operators[]
+  (put-operation 'project 'complex drop-complex->rational)
+  (put-operation 'project 'rational drop-rational->scheme-number))
+
+(defn project[z]
+  (apply-generic 'project z))
