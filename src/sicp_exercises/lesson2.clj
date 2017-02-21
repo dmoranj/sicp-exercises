@@ -2074,6 +2074,14 @@
                    (fn [[x] [y]]
                      (tag (/ x y))))
 
+    (put-operation 'exp
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (tag (Math/pow x y))))
+;;                    (fn exponentiation [[x] [y]]
+;;                      (println "x= " x "y= " y)
+;;                      (tag (Math/pow x y))))
+
     (put-operation 'eq
                    '(scheme-number scheme-number)
                    (fn [[x] [y]]
@@ -2088,6 +2096,7 @@
                    'scheme-number
                    (fn [x]
                      (tag x)))
+
     'done))
 
 (defn make-scheme-number [n]
@@ -2168,6 +2177,7 @@
 (defn sub [x y] (apply-generic 'sub x y))
 (defn mul [x y] (apply-generic 'mul x y))
 (defn div [x y] (apply-generic 'div x y))
+(defn exp [x y] (apply-generic 'exp x y))
 (defn =eq? [x y] (apply-generic 'eq x y))
 (defn is-zero? [x] (apply-generic 'zero x))
 
@@ -2238,9 +2248,10 @@
               t1->t2 (get-coercion type1 type2)
               t2->t1 (get-coercion type2 type1)]
           (cond
+            (= type1 type2) (throw (Exception. (str "No coercion for arguments of the same type " (reduce str (interpose ", " type-tags)))))
             t1->t2 (apply-generic op (t1->t2 a1) a2)
             t2->t1 (apply-generic op a1 (t2->t1 a2))
-            :else (throw (Exception. "No method for these types"))))
+            :else (throw (Exception. (str "No method for these types: " (reduce str (interpose ", " type-tags)))))))
         (throw (Exception. "No coercion method for the passed types"))))))
 
 (defn show-coercions[]
@@ -2254,6 +2265,7 @@
 
     (let [sn1 (make-scheme-number 9)
           sn2 (make-scheme-number 15)
+          sn3 (make-scheme-number 2)
           rat1 (make-rational 2 3)
           rat2 (make-rational 1 2)
           comp1 (make-complex-from-real-imag 5 3)
@@ -2264,5 +2276,6 @@
       (println (add rat1 comp1))
       (println (scheme-number->complex sn1))
       (println (sub sn1 comp2))
+      (println (exp sn1 sn3))
       )))
 
