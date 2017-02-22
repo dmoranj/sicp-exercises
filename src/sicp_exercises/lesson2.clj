@@ -2142,6 +2142,12 @@
                    (fn [z1 z2]
                      (tag (div-complex z1 z2))))
 
+    (put-operation 'eq
+                   '(complex complex)
+                   (fn [z1 z2]
+                     (and (== (real-part z1) (real-part z2))
+                          (== (imag-part z1) (imag-part z2)))))
+
     (put-operation 'make-from-real-imag
                    'complex
                    (fn [x y]
@@ -2363,7 +2369,7 @@
             (tower-down? type2 type1) (apply-generic op a1 (raise a2))
             (= type1 type2) (throw (Exception. (str "No method found for equal types: " (reduce str (interpose ", " type-tags)))))
             :else (throw (Exception. (str "No method for these types: " (reduce str (interpose ", " type-tags)))))))
-        (throw (Exception. "No coercion method for the passed types"))))))
+        (throw (Exception. (str "Binary operators allowed only for the passed types: " (reduce str (interpose ", " type-tags)))))))))
 
 (defn show-raise[]
   (do
@@ -2392,11 +2398,45 @@
       )))
 
 (defn drop-rational->scheme-number[z]
-  (make-scheme-number (quot (numer z) (denom z))))
+  (let [original-rat (attach-tag 'rational z)]
+  (make-scheme-number (quot (numer original-rat) (denom original-rat)))))
+
+(defn drop-scheme->scheme[x]
+  (make-scheme-number (first x)))
 
 (defn install-project-operators[]
-  (put-operation 'project 'complex drop-complex->rational)
-  (put-operation 'project 'rational drop-rational->scheme-number))
+  (put-operation 'project '(complex) drop-complex->rational)
+  (put-operation 'project '(rational) drop-rational->scheme-number)
+  (put-operation 'project '(scheme-number) drop-scheme->scheme))
 
 (defn project[z]
   (apply-generic 'project z))
+
+(defn drop-type [z]
+  (loop [current-number z]
+    (let [projection (project current-number)]
+      (cond
+        (= (type-tag projection) (type-tag current-number)) current-number
+        (not (=eq? current-number (raise projection))) current-number
+        :else (recur projection)))))
+
+(defn show-drop[]
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+    (install-project-operators)
+
+    (let [sn1 (make-scheme-number 9)
+          rat1 (make-rational 2 3)
+          rat2 (make-rational 8 2)
+          comp1 (make-complex-from-real-imag 5 0)
+          comp2 (make-complex-from-real-imag 3 1)
+          ]
+      (println (drop-type comp1))
+      (println (drop-type comp2))
+      )))
+
