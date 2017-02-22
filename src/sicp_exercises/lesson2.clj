@@ -1917,7 +1917,7 @@
   ((get-operation 'make 'scheme-number) n))
 
 (defn add-type[z]
-  (if (list? z)
+  (if (coll? z)
     z
     (make-scheme-number z)))
 
@@ -1926,7 +1926,10 @@
 
         imag-part (fn [z] (second z))
 
-        make-from-real-imag (fn [x y] (list x y))
+        make-from-real-imag (fn [x y]
+                              (let [typed-x (add-type x)
+                                    typed-y (add-type y)]
+                                (list typed-x typed-y)))
 
         magnitude (fn [z]
                     (sqrt (add (exp (real-part z) 2)
@@ -1939,30 +1942,27 @@
                             (list (mul r (cos a)) (mul r (sin a))))
         tag (fn [z]
               (attach-tag 'rectangular z))
-
-        tagn (fn [z]
-               (attach-tag 'scheme-number z))
         ]
 
     (put-operation 'real-part
                    '(rectangular)
                    (fn [z]
-                     (tagn (list (real-part z)))))
+                     (real-part z)))
 
     (put-operation 'imag-part
                    '(rectangular)
                    (fn [z]
-                     (tagn (list (imag-part z)))))
+                     (imag-part z)))
 
     (put-operation 'magnitude
                    '(rectangular)
                    (fn [z]
-                     (tagn (list (magnitude z)))))
+                     (magnitude z)))
 
     (put-operation 'angle
                    '(rectangular)
                    (fn [z]
-                     (tagn (list (angle z)))))
+                     (angle z)))
 
     (put-operation 'make-from-real-imag
                    'rectangular
@@ -1993,33 +1993,30 @@
                     (mul (magnitude z) (sin (angle z))))
 
         make-from-real-imag (fn [x y]
-                              ;; TODO: add SQRT, atan and pow to the system to allow typed constructor
                               (list (make-scheme-number (sqrt (add (exp x 2) (exp y 2))))
                                     (make-scheme-number (atan2 y x))))
 
-        tag (fn [x] (attach-tag 'polar x))
-
-        tagn (fn [x] (attach-tag 'scheme-number x))]
+        tag (fn [x] (attach-tag 'polar x))]
 
     (put-operation 'real-part
                    '(polar)
                    (fn [z]
-                     (tagn (list (real-part z)))))
+                     (real-part z)))
 
     (put-operation 'imag-part
                    '(polar)
                    (fn [z]
-                     (tagn (list (imag-part z)))))
+                     (imag-part z)))
 
     (put-operation 'magnitude
                    '(polar)
                    (fn [z]
-                     (tagn (list (magnitude z)))))
+                     (magnitude z)))
 
     (put-operation 'angle
                    '(polar)
                    (fn [z]
-                     (tagn (list (angle z)))))
+                     (angle z)))
 
     (put-operation 'make-from-real-imag
                    'polar
@@ -2110,7 +2107,6 @@
     (put-operation 'add
                    '(scheme-number scheme-number)
                    (fn [[x] [y]]
-                     (println "x: " x "y: " y)
                      (tag (+ x y))))
     (put-operation 'sub
                    '(scheme-number scheme-number)
@@ -2143,7 +2139,6 @@
     (put-operation 'sqrt
                    '(scheme-number)
                    (fn [[x]]
-                     (println "Getting sqrt of " x)
                      (tag (Math/sqrt x))))
 
     (put-operation 'cos
@@ -2420,7 +2415,7 @@
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
         proc (get-operation op type-tags)]
-    ;(println "op " op " type-tags " type-tags " args " args)
+    (println "op " op " type-tags " type-tags " args " args)
     (if proc
       (do
 ;        (println "Dropper expression: " (apply proc (map contents args)))
@@ -2524,8 +2519,8 @@
           comp2 (make-complex-from-real-imag 3 1)
           comp3 (make-complex-from-real-imag 3 -1)
           ]
-      (add comp2 comp3)
-      ;(sub (add comp2 comp3) comp1)
-      ;(add (real-part comp2) sn1)
+      (println (add comp2 comp3))
+      (println (make-complex-from-real-imag sn1 sn1))
+      (println (sub (add comp2 comp3) comp1))
+      (add (real-part comp2) sn1)
       )))
-
