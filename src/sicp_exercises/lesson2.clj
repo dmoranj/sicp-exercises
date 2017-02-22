@@ -1894,6 +1894,33 @@
 
 (declare apply-generic)
 
+(defn add [x y] (apply-generic 'add x y))
+(defn sub [x y] (apply-generic 'sub x y))
+(defn mul [x y] (apply-generic 'mul x y))
+(defn div [x y] (apply-generic 'div x y))
+(defn exp [x y] (apply-generic 'exp x y))
+(defn =eq? [x y] (apply-generic 'eq x y))
+(defn is-zero? [x] (apply-generic 'zero x))
+(defn real-part [z] (apply-generic 'real-part z))
+(defn imag-part [z] (apply-generic 'imag-part z))
+(defn magnitude [z] (apply-generic 'magnitude z))
+(defn angle [z] (apply-generic 'angle z))
+(defn denom [z] (apply-generic 'denom z))
+(defn numer [z] (apply-generic 'numer z))
+
+(defn sqrt [z] (apply-generic 'sqrt z))
+(defn sin [z] (apply-generic 'sin z))
+(defn cos [z] (apply-generic 'cos z))
+(defn atan2 [z1 z2] (apply-generic 'atan2 z1 z2))
+
+(defn make-scheme-number [n]
+  ((get-operation 'make 'scheme-number) n))
+
+(defn add-type[z]
+  (if (list? z)
+    z
+    (make-scheme-number z)))
+
 (defn install-rectangular-package[]
   (let [real-part (fn [z] (first z))
 
@@ -1902,24 +1929,40 @@
         make-from-real-imag (fn [x y] (list x y))
 
         magnitude (fn [z]
-                    (Math/sqrt (+ (Math/pow (real-part z) 2)
-                                  (Math/pow (imag-part z) 2))))
+                    (sqrt (add (exp (real-part z) 2)
+                                  (exp (imag-part z) 2))))
 
         angle (fn [z]
-                (Math/atan2 (imag-part z) (real-part z)))
+                (atan2 (imag-part z) (real-part z)))
 
         make-from-mag-ang (fn [r a]
-                            (list (* r (Math/cos a)) (* r (Math/sin a))))
+                            (list (mul r (cos a)) (mul r (sin a))))
         tag (fn [z]
-              (attach-tag 'rectangular z))]
+              (attach-tag 'rectangular z))
 
-    (put-operation 'real-part '(rectangular) real-part)
+        tagn (fn [z]
+               (attach-tag 'scheme-number z))
+        ]
 
-    (put-operation 'imag-part '(rectangular) imag-part)
+    (put-operation 'real-part
+                   '(rectangular)
+                   (fn [z]
+                     (tagn (list (real-part z)))))
 
-    (put-operation 'magnitude '(rectangular) magnitude)
+    (put-operation 'imag-part
+                   '(rectangular)
+                   (fn [z]
+                     (tagn (list (imag-part z)))))
 
-    (put-operation 'angle '(rectangular) angle)
+    (put-operation 'magnitude
+                   '(rectangular)
+                   (fn [z]
+                     (tagn (list (magnitude z)))))
+
+    (put-operation 'angle
+                   '(rectangular)
+                   (fn [z]
+                     (tagn (list (angle z)))))
 
     (put-operation 'make-from-real-imag
                    'rectangular
@@ -1938,27 +1981,45 @@
 
         angle (fn [z] (second z))
 
-        make-from-mag-ang (fn [r a] (list r a))
+        make-from-mag-ang (fn [r a]
+                            (let [typed-r (add-type r)
+                                  typed-a (add-type a)]
+                              (list typed-r typed-a)))
 
         real-part (fn [z]
-                    (* (magnitude z) (Math/cos (angle z))))
+                    (mul (magnitude z) (cos (angle z))))
 
         imag-part (fn [z]
-                    (* (magnitude z) (Math/sin (angle z))))
+                    (mul (magnitude z) (sin (angle z))))
 
         make-from-real-imag (fn [x y]
-                              (list (Math/sqrt (+ (Math/pow x 2) (Math/pow y 2)))
-                                    (Math/atan2 y x)))
+                              ;; TODO: add SQRT, atan and pow to the system to allow typed constructor
+                              (list (make-scheme-number (sqrt (add (exp x 2) (exp y 2))))
+                                    (make-scheme-number (atan2 y x))))
 
-        tag (fn [x] (attach-tag 'polar x))]
+        tag (fn [x] (attach-tag 'polar x))
 
-    (put-operation 'real-part '(polar) real-part)
+        tagn (fn [x] (attach-tag 'scheme-number x))]
 
-    (put-operation 'imag-part '(polar) imag-part)
+    (put-operation 'real-part
+                   '(polar)
+                   (fn [z]
+                     (tagn (list (real-part z)))))
 
-    (put-operation 'magnitude '(polar) magnitude)
+    (put-operation 'imag-part
+                   '(polar)
+                   (fn [z]
+                     (tagn (list (imag-part z)))))
 
-    (put-operation 'angle '(polar) angle)
+    (put-operation 'magnitude
+                   '(polar)
+                   (fn [z]
+                     (tagn (list (magnitude z)))))
+
+    (put-operation 'angle
+                   '(polar)
+                   (fn [z]
+                     (tagn (list (angle z)))))
 
     (put-operation 'make-from-real-imag
                    'polar
@@ -1971,11 +2032,6 @@
                      (tag (make-from-mag-ang r a))))
 
     'done))
-
-(defn real-part [z] (apply-generic 'real-part z))
-(defn imag-part [z] (apply-generic 'imag-part z))
-(defn magnitude [z] (apply-generic 'magnitude z))
-(defn angle [z] (apply-generic 'angle z))
 
 ;; Exercise 2.79
 (defn contents [datum]
@@ -2045,9 +2101,6 @@
                      (tag (make-rat n d))))
     'done))
 
-(defn denom [z] (apply-generic 'denom z))
-(defn numer [z] (apply-generic 'numer z))
-
 (defn make-rational [n d]
   ((get-operation 'make 'rational) n d))
 
@@ -2082,6 +2135,27 @@
                    (fn [[x] [y]]
                      (== x y)))
 
+    (put-operation 'atan2
+                   '(scheme-number scheme-number)
+                   (fn [[x] [y]]
+                     (tag (Math/atan2 x y))))
+
+    (put-operation 'sqrt
+                   '(scheme-number)
+                   (fn [[x]]
+                     (println "Getting sqrt of " x)
+                     (tag (Math/sqrt x))))
+
+    (put-operation 'cos
+                   '(scheme-number)
+                   (fn [[x]]
+                     (tag (Math/cos x))))
+
+    (put-operation 'sin
+                   '(scheme-number)
+                   (fn [[x]]
+                     (tag (Math/sin x))))
+
     (put-operation 'zero
                    '(scheme-number)
                    (fn [[x]]
@@ -2094,30 +2168,28 @@
 
     'done))
 
-(defn make-scheme-number [n]
-  ((get-operation 'make 'scheme-number) n))
-
 (defn install-complex-package[]
   (let [make-from-real-imag (fn [x y]
                               ((get-operation 'make-from-real-imag 'rectangular) x y))
+
         make-from-mag-ang (fn [r a]
                             ((get-operation 'make-from-mag-ang 'polar) r a))
 
         add-complex (fn [z1 z2]
-                      (make-from-real-imag (+ (real-part z1) (real-part z2))
-                                           (+ (imag-part z1) (imag-part z2))))
+                      (make-from-real-imag (add (real-part z1) (real-part z2))
+                                           (add (imag-part z1) (imag-part z2))))
 
         sub-complex (fn [z1 z2]
-                      (make-from-real-imag (- (real-part z1) (real-part z2))
-                                           (- (imag-part z1) (imag-part z2))))
+                      (make-from-real-imag (sub (real-part z1) (real-part z2))
+                                           (sub (imag-part z1) (imag-part z2))))
 
         mul-complex (fn [z1 z2]
-                      (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-                                         (+ (angle z1) (angle z2))))
+                      (make-from-mag-ang (mul (magnitude z1) (magnitude z2))
+                                         (mul (angle z1) (angle z2))))
 
         div-complex (fn [z1 z2]
-                      (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-                                         (- (angle z1) (angle z2))))
+                      (make-from-mag-ang (div (magnitude z1) (magnitude z2))
+                                         (sub (angle z1) (angle z2))))
 
         tag (fn [z]
               (attach-tag 'complex z))]
@@ -2173,14 +2245,6 @@
 
 (defn make-complex-from-mag-ang [r a]
   ((get-operation 'make-from-mag-ang 'complex) r a))
-
-(defn add [x y] (apply-generic 'add x y))
-(defn sub [x y] (apply-generic 'sub x y))
-(defn mul [x y] (apply-generic 'mul x y))
-(defn div [x y] (apply-generic 'div x y))
-(defn exp [x y] (apply-generic 'exp x y))
-(defn =eq? [x y] (apply-generic 'eq x y))
-(defn is-zero? [x] (apply-generic 'zero x))
 
 (defn show-generic-arithmetic[]
   (do
@@ -2356,8 +2420,11 @@
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
         proc (get-operation op type-tags)]
+    ;(println "op " op " type-tags " type-tags " args " args)
     (if proc
-      (apply proc (map contents args))
+      (do
+;        (println "Dropper expression: " (apply proc (map contents args)))
+        (apply proc (map contents args)))
       (if (= (count args) 2)
         (let [tower-down? (generate-tower-comparator)
               type1 (first type-tags)
@@ -2420,7 +2487,27 @@
         (not (=eq? current-number (raise projection))) current-number
         :else (recur projection)))))
 
-(defn show-drop[]
+;; Exercise 2.85
+(defn show-new-operations[]
+  (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+    (install-project-operators)
+    (let [sn1 (make-scheme-number 10)
+          sn2 (make-scheme-number 16)
+          sn3 (make-scheme-number Math/PI)]
+      (println (add sn1 sn2))
+      (println (sqrt sn2))
+      (println (cos sn3))
+      (println (sin sn3))
+      (println (atan2 sn1 sn2))
+      )))
+
+(defn show-generic-complex[]
   (do
     (install-polar-package)
     (install-rectangular-package)
@@ -2435,8 +2522,10 @@
           rat2 (make-rational 8 2)
           comp1 (make-complex-from-real-imag 5 0)
           comp2 (make-complex-from-real-imag 3 1)
+          comp3 (make-complex-from-real-imag 3 -1)
           ]
-      (println (drop-type comp1))
-      (println (drop-type comp2))
+      (add comp2 comp3)
+      ;(sub (add comp2 comp3) comp1)
+      ;(add (real-part comp2) sn1)
       )))
 
