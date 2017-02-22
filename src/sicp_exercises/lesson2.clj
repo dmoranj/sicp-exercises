@@ -2415,11 +2415,8 @@
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
         proc (get-operation op type-tags)]
-    (println "op " op " type-tags " type-tags " args " args)
     (if proc
-      (do
-;        (println "Dropper expression: " (apply proc (map contents args)))
-        (apply proc (map contents args)))
+      (apply proc (map contents args))
       (if (= (count args) 2)
         (let [tower-down? (generate-tower-comparator)
               type1 (first type-tags)
@@ -2464,7 +2461,7 @@
   (make-scheme-number (quot (numer original-rat) (denom original-rat)))))
 
 (defn drop-scheme->scheme[x]
-  (make-scheme-number (first x)))
+  (attach-tag 'scheme-number x))
 
 (defn install-project-operators[]
   (put-operation 'project '(complex) drop-complex->rational)
@@ -2481,6 +2478,7 @@
         (= (type-tag projection) (type-tag current-number)) current-number
         (not (=eq? current-number (raise projection))) current-number
         :else (recur projection)))))
+
 
 ;; Exercise 2.85
 (defn show-new-operations[]
@@ -2519,8 +2517,8 @@
           comp2 (make-complex-from-real-imag 3 1)
           comp3 (make-complex-from-real-imag 3 -1)
           ]
-      (println (add comp2 comp3))
-      (println (make-complex-from-real-imag sn1 sn1))
-      (println (sub (add comp2 comp3) comp1))
-      (add (real-part comp2) sn1)
+       (println "-> " (add comp2 comp3))
+       (println "-> " (make-complex-from-real-imag sn1 sn1))
+       (println "-> " (sub (add comp2 comp3) comp1))
+       (println "-> " (add (real-part comp2) sn1))
       )))
