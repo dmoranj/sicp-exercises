@@ -1908,6 +1908,8 @@
 (defn denom [z] (apply-generic 'denom z))
 (defn numer [z] (apply-generic 'numer z))
 
+(defn neg [z] (apply-generic 'neg z))
+
 (defn sqrt [z] (apply-generic 'sqrt z))
 (defn sin [z] (apply-generic 'sin z))
 (defn cos [z] (apply-generic 'cos z))
@@ -2056,6 +2058,10 @@
         div-rat (fn [x y]
                   (make-rat (* (numer x) (denom y))
                             (* (denom x) (numer y))))
+        neg (fn [x]
+              (make-rat (- (numer x))
+                        (denom x)))
+
         tag (fn [x]
               (attach-tag 'rational x))]
     (put-operation 'add
@@ -2077,6 +2083,11 @@
                    '(rational rational)
                    (fn [x y]
                      (tag (div-rat x y))))
+
+    (put-operation 'neg
+                   '(rational)
+                   (fn [x]
+                     (tag (neg x))))
 
     (put-operation 'eq
                    '(rational rational)
@@ -2130,6 +2141,11 @@
                    '(scheme-number scheme-number)
                    (fn [[x] [y]]
                      (== x y)))
+
+    (put-operation 'neg
+                   '(scheme-number)
+                   (fn [[x]]
+                     (tag (- x))))
 
     (put-operation 'atan2
                    '(scheme-number scheme-number)
@@ -2186,6 +2202,10 @@
                       (make-from-mag-ang (div (magnitude z1) (magnitude z2))
                                          (sub (angle z1) (angle z2))))
 
+        neg (fn [z]
+              (make-from-real-imag (neg (real-part z))
+                                   (imag-part z)))
+
         tag (fn [z]
               (attach-tag 'complex z))]
 
@@ -2214,6 +2234,11 @@
                    (fn [z1 z2]
                      (and (== (real-part z1) (real-part z2))
                           (== (imag-part z1) (imag-part z2)))))
+
+    (put-operation 'neg
+                   '(complex)
+                   (fn [z]
+                     (tag (neg z))))
 
     (put-operation 'make-from-real-imag
                    'complex
@@ -2415,7 +2440,7 @@
 (defn apply-generic [op & args]
   (let [type-tags (map type-tag args)
         proc (get-operation op type-tags)]
-    ;(println "op= " op "type-tags= " type-tags "args= " args)
+    ;(println "op= " op "type-tags= " type-tags "args= " args "contents= " (map contents args) "proc= " proc)
     (if proc
       (apply proc (map contents args))
       (if (= (count args) 2)
@@ -2586,6 +2611,20 @@
     (add-terms (mul-term-by-all-terms (first-term L1) L2)
                (mul-terms (rest-terms L1) L2))))
 
+(defn neg-terms [L]
+  (reverse
+    (loop [ remaining L
+          result (the-empty-termlist)]
+    (if (empty-termlist? remaining)
+      result
+      (recur
+        (rest-terms remaining)
+        (adjoin-term
+          (make-term (order (first-term remaining))
+                     (neg (coeff (first-term remaining))))
+          result
+          ))))))
+
 (defn install-polynomial-package []
   (let [ make-poly (fn [variable term-list]
                      (list variable term-list))
@@ -2610,6 +2649,10 @@
                                             (term-list p2)))
                       (throw (Exception. "Polys not in same var -- MUL-POLY"))))
 
+         neg-poly (fn neg [p]
+               (make-poly (variable p)
+                          (neg-terms (term-list p))))
+
          tag (fn [p]
                (attach-tag 'polynomial p))]
 
@@ -2623,10 +2666,26 @@
                    (fn [p1 p2]
                      (tag (mul-poly p1 p2))))
 
+    (put-operation 'sub
+                   '(polynomial polynomial)
+                   (fn [p1 p2]
+                     (tag (add-poly p1 (neg-poly p2)))))
+
     (put-operation 'make
                    'polynomial
                    (fn [var terms]
                      (tag (make-poly var terms))))
+
+    (put-operation 'neg
+                   '(polynomial)
+                   (fn [p]
+                     (tag (neg-poly p))))
+
+
+    (put-operation 'zero
+                   '(polynomial)
+                   (fn [p]
+                     (empty? (term-list p))))
 
     'done))
 
@@ -2652,4 +2711,33 @@
       (println (mul poly1 poly2))
       )))
 
+;; Exercises 2.87 and 2.88
+(defn with-dependencies[f]
+   (do
+    (install-polar-package)
+    (install-rectangular-package)
+    (install-rational-package)
+    (install-scheme-number-package)
+    (install-complex-package)
+    (install-coercions)
+    (install-project-operators)
+    (install-polynomial-package)
+    (f)))
+
+(defn show-zero-and-sub []
+  (with-dependencies (fn []
+                       (let [ sn1 (make-scheme-number 3)
+                              sn2 (make-scheme-number 6)
+                              sn3 (make-scheme-number -3)
+                              poly1 (make-polynomial 'x  (list (list 2 sn1) (list 0 sn2)))
+                              poly2 (make-polynomial 'x  '())
+                              poly3 (make-polynomial 'x  (list (list 2 sn2) (list 0 sn3)))
+                              ]
+
+                         (println "Zero p? " (is-zero? poly1))
+                         (println "Zero p? " (is-zero? poly2))
+                         (println "Neg p: " (neg poly1))
+                         (println "Sub: " (sub poly1 poly3))
+                         (println "Zerp p -p?: " (is-zero? (sub poly1 poly1)))
+                         ))))
 
