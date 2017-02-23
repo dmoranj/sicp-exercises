@@ -35,3 +35,27 @@
             (swap! internal-counter inc)
             (f arg))))))
 
+;; Exercise 3.3
+(defn make-account [balance password]
+  (let [ inner-balance (atom balance)
+         withdraw (fn [amount]
+                    (if (>= balance amount)
+                      (do
+                        (swap! inner-balance #(- % amount))
+                        @inner-balance)))
+
+         deposit (fn [amount]
+                   (swap! inner-balance #(+ % amount))
+                   @inner-balance)
+
+         dispatch (fn [pass m]
+                    (if (= pass password)
+                      (cond
+                        (= m 'withdraw) withdraw
+                        (= m 'deposit) deposit
+                        :else (throw (Exception. "Unkwnown request -- MAKE-ACCOUNT")))
+                      (throw (Exception. "Incorrect password"))
+                      ))]
+    dispatch))
+
+
