@@ -29,15 +29,16 @@
     (fn dispatch[arg]
       (cond
         (= arg 'how-many-calls) @internal-counter
-        (= arg 'reset-count) (swap! internal-counter #(* 0 %))
+        (= arg 'reset-count) (reset! internal-counter 0)
         :else
           (do
             (swap! internal-counter inc)
             (f arg))))))
 
-;; Exercise 3.3
+;; Exercise 3.3 and 3.4
 (defn make-account [balance password]
   (let [ inner-balance (atom balance)
+         wrong-pass-counter (atom 0)
          withdraw (fn [amount]
                     (if (>= balance amount)
                       (do
@@ -48,14 +49,23 @@
                    (swap! inner-balance #(+ % amount))
                    @inner-balance)
 
+         call-the-cops (fn [args]
+                         (reset! wrong-pass-counter 0)
+                         (println "SOMEONE CALL THE COPS!!!! STOLEN PASSWORD!!!"))
+
          dispatch (fn [pass m]
                     (if (= pass password)
-                      (cond
-                        (= m 'withdraw) withdraw
-                        (= m 'deposit) deposit
-                        :else (throw (Exception. "Unkwnown request -- MAKE-ACCOUNT")))
-                      (throw (Exception. "Incorrect password"))
+                      (do
+                        (reset! wrong-pass-counter 0)
+                        (cond
+                          (= m 'withdraw) withdraw
+                          (= m 'deposit) deposit
+                          :else (throw (Exception. "Unkwnown request -- MAKE-ACCOUNT"))))
+                      (do
+                        (swap! wrong-pass-counter inc)
+                        (if (> @wrong-pass-counter 7)
+                          call-the-cops
+                          (throw (Exception. "Incorrect password"))))
                       ))]
     dispatch))
-
 
