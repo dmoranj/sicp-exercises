@@ -2549,85 +2549,127 @@
        (println "-> " (add (real-part comp2) sn1))
       )))
 
+;; Exercises 2.90
+(defn add-terms[L1 L2] (apply-generic 'add-terms L1 L2))
+(defn mul-terms[L1 L2] (apply-generic 'mul-terms L1 L2))
+(defn neg-terms[L] (apply-generic 'neg-terms L))
+
+(defn install-sparse-polynomials[]
+  (let [
+         make-term (fn make-term [order coeff]
+                     (list order coeff))
+
+         make-from-sparse-list (fn [L]
+                                 L)
+
+         order (fn order [term]
+                 (first term))
+
+         coefff (fn coeff [term]
+                  (second term))
+
+         the-empty-termlist (fn the-empty-termlist []
+                              '())
+
+         adjoin-term (fn adjoin-term [term term-list]
+                       (if (is-zero? (coeff term))
+                         term-list
+                         (cons term term-list)))
+
+         first-term (fn [term-list]
+                      (first term-list))
+
+         rest-terms (fn [term-list]
+                      (rest term-list))
+
+         empty-termlist? (fn [term-list]
+                           (empty? term-list))
+
+         add-terms (fn add-terms [L1 L2]
+                     (cond
+                       (empty-termlist? L1) L2
+                       (empty-termlist? L2) L1
+                       :else
+                       (let [t1 (first-term L1)
+                             t2 (first-term L2)]
+                         (cond
+                           (> (order t1) (order t2)) (adjoin-term t1 (add-terms (rest-terms L1) L2))
+                           (< (order t1) (order t2)) (adjoin-term t2 (add-terms L1 (rest-terms L2)))
+                           :else
+                           (adjoin-term
+                             (make-term (order t1)
+                                        (add (coeff t1) (coeff t2)))
+                             (add-terms (rest-terms L1)
+                                        (rest-terms L2)))))))
+
+         mul-term-by-all-terms (fn mul-term-by-all-terms [t1 L]
+                                 (if (empty-termlist? L)
+                                   (the-empty-termlist)
+                                   (let [t2 (first-term L)]
+                                     (adjoin-term
+                                       (make-term (+ (order t1) (order t2))
+                                                  (mul (coeff t1) (coeff t2)))
+                                       (mul-term-by-all-terms t1 (rest-terms L))))))
+
+         mul-terms (fn mul-terms [L1 L2]
+                     (if (empty-termlist? L1)
+                       (the-empty-termlist)
+                       (add-terms (mul-term-by-all-terms (first-term L1) L2)
+                                  (mul-terms (rest-terms L1) L2))))
+
+         neg-terms (fn neg-terms [L]
+                     (reverse
+                       (loop [ remaining L
+                               result (the-empty-termlist)]
+                         (if (empty-termlist? remaining)
+                           result
+                           (recur
+                             (rest-terms remaining)
+                             (adjoin-term
+                               (make-term (order (first-term remaining))
+                                          (neg (coeff (first-term remaining))))
+                               result
+                               ))))))
+
+         tag (fn [L]
+               (attach-tag 'sparse L))]
+
+    (put-operation 'add-terms
+                   '(sparse sparse)
+                   (fn [L1 L2]
+                     (tag (add-terms L1 L2))))
+
+    (put-operation 'mul-terms
+                   '(sparse sparse)
+                   (fn [L1 L2]
+                     (tag (mul-terms L1 L2))))
+
+    (put-operation 'neg-terms
+                   '(sparse)
+                   (fn [L]
+                     (tag (neg L))))
+
+    (put-operation 'make-from-sparse-list
+                   'sparse
+                   (fn [L]
+                     (tag (make-from-sparse-list L))))
+
+    'done
+    ))
+
 ;; Polynomial arithmetic functions
-(defn make-term [order coeff]
-  (list order coeff))
-
-(defn order [term]
-  (first term))
-
-(defn coeff [term]
-  (second term))
-
-(defn the-empty-termlist []
-  '())
-
-(defn adjoin-term [term term-list]
-  (if (is-zero? (coeff term))
-    term-list
-    (cons term term-list)))
-
-(defn first-term [term-list]
-  (first term-list))
-
-(defn rest-terms [term-list]
-  (rest term-list))
-
-(defn empty-termlist? [term-list]
-  (empty? term-list))
-
 (defn make-polynomial [var terms]
   ((get-operation 'make 'polynomial) var terms))
 
-(defn add-terms [L1 L2]
-  (cond
-    (empty-termlist? L1) L2
-    (empty-termlist? L2) L1
-    :else
-      (let [t1 (first-term L1)
-            t2 (first-term L2)]
-        (cond
-          (> (order t1) (order t2)) (adjoin-term t1 (add-terms (rest-terms L1) L2))
-          (< (order t1) (order t2)) (adjoin-term t2 (add-terms L1 (rest-terms L2)))
-          :else
-            (adjoin-term
-              (make-term (order t1)
-                         (add (coeff t1) (coeff t2)))
-              (add-terms (rest-terms L1)
-                         (rest-terms L2)))))))
-
-(defn mul-term-by-all-terms [t1 L]
-  (if (empty-termlist? L)
-    (the-empty-termlist)
-    (let [t2 (first-term L)]
-      (adjoin-term
-        (make-term (+ (order t1) (order t2))
-                   (mul (coeff t1) (coeff t2)))
-        (mul-term-by-all-terms t1 (rest-terms L))))))
-
-(defn mul-terms [L1 L2]
-  (if (empty-termlist? L1)
-    (the-empty-termlist)
-    (add-terms (mul-term-by-all-terms (first-term L1) L2)
-               (mul-terms (rest-terms L1) L2))))
-
-(defn neg-terms [L]
-  (reverse
-    (loop [ remaining L
-          result (the-empty-termlist)]
-    (if (empty-termlist? remaining)
-      result
-      (recur
-        (rest-terms remaining)
-        (adjoin-term
-          (make-term (order (first-term remaining))
-                     (neg (coeff (first-term remaining))))
-          result
-          ))))))
 
 (defn install-polynomial-package []
   (let [ make-poly (fn [variable term-list]
                      (list variable term-list))
+
+         make-from-sparse-list (fn [variable L]
+                                 (make-poly
+                                   variable
+                                   ((get-operation 'make-from-sparse-list 'sparse) L)))
 
          variable (fn [p]
                     (first p))
@@ -2676,6 +2718,11 @@
                    (fn [var terms]
                      (tag (make-poly var terms))))
 
+    (put-operation 'make-from-sparse-list
+                   'polynomial
+                   (fn [var L]
+                     (tag (make-from-sparse-list var L))))
+
     (put-operation 'neg
                    '(polynomial)
                    (fn [p]
@@ -2689,29 +2736,9 @@
 
     'done))
 
-(defn show-polynomials[]
-  (do
-    (install-polar-package)
-    (install-rectangular-package)
-    (install-rational-package)
-    (install-scheme-number-package)
-    (install-complex-package)
-    (install-coercions)
-    (install-project-operators)
-    (install-polynomial-package)
+(defn make-polynomial-from-sparse-list [var L]
+  ((get-operation 'make-from-sparse-list 'polynomial) var L))
 
-    (let [ sn1 (make-scheme-number 3)
-           sn2 (make-scheme-number 6)
-           sn3 (make-scheme-number -4)
-           sn4 (make-scheme-number 4)
-           poly1 (make-polynomial 'x  (list (list 2 sn1) (list 0 sn2)))
-           poly2 (make-polynomial 'x  (list (list 2 sn3) (list 1 sn4) (list 0 sn1)))]
-
-      (println (add poly1 poly2))
-      (println (mul poly1 poly2))
-      )))
-
-;; Exercises 2.87 and 2.88
 (defn with-dependencies[f]
    (do
     (install-polar-package)
@@ -2722,8 +2749,25 @@
     (install-coercions)
     (install-project-operators)
     (install-polynomial-package)
+    (install-sparse-polynomials)
     (f)))
 
+(defn show-polynomials[]
+  (with-dependencies (fn []
+    (let [ sn1 (make-scheme-number 3)
+           sn2 (make-scheme-number 6)
+           sn3 (make-scheme-number -4)
+           sn4 (make-scheme-number 4)
+           poly1 (make-polynomial-from-sparse-list 'x (list (list 2 sn1) (list 0 sn2)))
+           poly2 (make-polynomial-from-sparse-list 'x (list (list 2 sn3) (list 1 sn4) (list 0 sn1)))]
+
+      (println "Poly1: " poly1)
+      (println "Poly2: " poly2)
+      (println (add poly1 poly2))
+      (println (mul poly1 poly2))
+      ))))
+
+;; Exercises 2.87 and 2.88
 (defn show-zero-and-sub []
   (with-dependencies (fn []
                        (let [ sn1 (make-scheme-number 3)
@@ -2740,4 +2784,3 @@
                          (println "Sub: " (sub poly1 poly3))
                          (println "Zerp p -p?: " (is-zero? (sub poly1 poly1)))
                          ))))
-
