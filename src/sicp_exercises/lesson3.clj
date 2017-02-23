@@ -23,3 +23,15 @@
     (println (A 10))
     (println (A 10))))
 
+;; Exercise 3.2
+(defn make-monitored[f]
+  (let [internal-counter (atom 0)]
+    (fn dispatch[arg]
+      (cond
+        (= arg 'how-many-calls) @internal-counter
+        (= arg 'reset-count) (swap! internal-counter #(* 0 %))
+        :else
+          (do
+            (swap! internal-counter inc)
+            (f arg))))))
+
