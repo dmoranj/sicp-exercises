@@ -2657,6 +2657,148 @@
     'done
     ))
 
+
+;; Exercises 2.89
+(defn install-dense-polynomials[]
+  (let [
+         make-term (fn make-term [order coeff]
+                     (list order coeff))
+
+         order (fn order [term]
+                 (first term))
+
+         coefff (fn coeff [term]
+                  (second term))
+
+         the-empty-termlist (fn the-empty-termlist []
+                              '())
+
+         first-term (fn [term-list]
+                      (make-term (dec (count term-list))
+                                 (first term-list)))
+
+         fill-to (fn fill-to [terms order]
+                   (let [difference (- order (count terms))]
+                     (if (< difference 0)
+                       terms
+                       (append (repeat difference (make-scheme-number 0)) terms))))
+
+         insert-in-position (fn insert-in-position [term term-list]
+                              (println "Inseting into position for term: " term " and list: " term-list)
+                              (let [o (order term)
+                                    c (coeff term)]
+                                (loop [ current term-list
+                                        result (the-empty-termlist)]
+                                  ;(println "Looping with current: " current " and result: " result)
+                                  (cond
+                                    (empty? current) result
+                                    (== (count result) o) (recur (butlast current) (cons c result))
+                                    :else (recur (butlast current) (cons (last current) result))))))
+
+         adjoin-term (fn adjoin-term [term term-list]
+                       (if (> (order term) (dec (count term-list)))
+                         (cons (coeff term) (fill-to term-list (order term)))
+                         (insert-in-position term term-list)))
+
+         make-from-sparse-list (fn [L]
+                                 (loop [current L
+                                        result (the-empty-termlist)]
+                                   (if (empty? current)
+                                     result
+                                     (let [current-term (first current)]
+                                       (recur
+                                         (rest current)
+                                         (adjoin-term (make-term
+                                                        (first current-term)
+                                                        (second current-term))
+                                                      result))))))
+
+         make-from-dense-list (fn [L]
+                                (map make-scheme-number L))
+
+         rest-terms (fn [term-list]
+                      (rest term-list))
+
+         empty-termlist? (fn [term-list]
+                           (empty? term-list))
+
+         add-terms (fn add-terms [L1 L2]
+                     (cond
+                       (empty-termlist? L1) L2
+                       (empty-termlist? L2) L1
+                       :else
+                       (let [t1 (first-term L1)
+                             t2 (first-term L2)]
+                         (cond
+                           (> (order t1) (order t2)) (adjoin-term t1 (add-terms (rest-terms L1) L2))
+                           (< (order t1) (order t2)) (adjoin-term t2 (add-terms L1 (rest-terms L2)))
+                           :else
+                           (adjoin-term
+                             (make-term (order t1)
+                                        (add (coeff t1) (coeff t2)))
+                             (add-terms (rest-terms L1)
+                                        (rest-terms L2)))))))
+
+         mul-term-by-all-terms (fn mul-term-by-all-terms [t1 L]
+                                 (if (empty-termlist? L)
+                                   (the-empty-termlist)
+                                   (let [t2 (first-term L)]
+                                     (adjoin-term
+                                       (make-term (+ (order t1) (order t2))
+                                                  (mul (coeff t1) (coeff t2)))
+                                       (mul-term-by-all-terms t1 (rest-terms L))))))
+
+         mul-terms (fn mul-terms [L1 L2]
+                     (if (empty-termlist? L1)
+                       (the-empty-termlist)
+                       (add-terms (mul-term-by-all-terms (first-term L1) L2)
+                                  (mul-terms (rest-terms L1) L2))))
+
+         neg-terms (fn neg-terms [L]
+                       (loop [ remaining L
+                               result (the-empty-termlist)]
+                         (if (empty-termlist? remaining)
+                           result
+                           (recur
+                             (rest-terms remaining)
+                             (adjoin-term
+                               (make-term (order (first-term remaining))
+                                          (neg (coeff (first-term remaining))))
+                               result
+                               )))))
+
+         tag (fn [L]
+               (attach-tag 'dense L))]
+
+    (put-operation 'add-terms
+                   '(dense dense)
+                   (fn [L1 L2]
+                     (tag (add-terms L1 L2))))
+
+    (put-operation 'mul-terms
+                   '(dense dense)
+                   (fn [L1 L2]
+                     (tag (mul-terms L1 L2))))
+
+    (put-operation 'neg-terms
+                   '(dense)
+                   (fn [L]
+                     (tag (neg-terms L))))
+
+    (put-operation 'make-from-sparse-list
+                   'dense
+                   (fn [L]
+                     (tag (make-from-sparse-list L))))
+
+    (put-operation 'make-from-dense-list
+                   'dense
+                   (fn [L]
+                     (tag (make-from-dense-list L))))
+
+    'done
+    ))
+
+
 ;; Polynomial arithmetic functions
 (defn make-polynomial [var terms]
   ((get-operation 'make 'polynomial) var terms))
@@ -2670,6 +2812,11 @@
                                  (make-poly
                                    variable
                                    ((get-operation 'make-from-sparse-list 'sparse) L)))
+
+         make-from-dense-list (fn [variable L]
+                                 (make-poly
+                                   variable
+                                   ((get-operation 'make-from-dense-list 'dense) L)))
 
          variable (fn [p]
                     (first p))
@@ -2723,6 +2870,11 @@
                    (fn [var L]
                      (tag (make-from-sparse-list var L))))
 
+    (put-operation 'make-from-dense-list
+                   'polynomial
+                   (fn [var L]
+                     (tag (make-from-dense-list var L))))
+
     (put-operation 'neg
                    '(polynomial)
                    (fn [p]
@@ -2739,6 +2891,9 @@
 (defn make-polynomial-from-sparse-list [var L]
   ((get-operation 'make-from-sparse-list 'polynomial) var L))
 
+(defn make-polynomial-from-dense-list [var L]
+  ((get-operation 'make-from-dense-list 'polynomial) var L))
+
 (defn with-dependencies[f]
    (do
     (install-polar-package)
@@ -2750,6 +2905,7 @@
     (install-project-operators)
     (install-polynomial-package)
     (install-sparse-polynomials)
+    (install-dense-polynomials)
     (f)))
 
 (defn show-polynomials[]
@@ -2759,12 +2915,20 @@
            sn3 (make-scheme-number -4)
            sn4 (make-scheme-number 4)
            poly1 (make-polynomial-from-sparse-list 'x (list (list 2 sn1) (list 0 sn2)))
-           poly2 (make-polynomial-from-sparse-list 'x (list (list 2 sn3) (list 1 sn4) (list 0 sn1)))]
+           poly2 (make-polynomial-from-sparse-list 'x (list (list 2 sn3) (list 1 sn4) (list 0 sn1)))
+           poly3 (make-polynomial-from-dense-list 'x '(3 0 6))
+           poly4 (make-polynomial-from-dense-list 'x '(-4 4 3))
+           ]
 
       (println "Poly1: " poly1)
       (println "Poly2: " poly2)
       (println (add poly1 poly2))
       (println (mul poly1 poly2))
+      (println "Poly3: " poly3)
+      (println "Poly4: " poly4)
+      (println (add poly3 poly4))
+      (println (neg poly4))
+      (println (mul poly3 poly4))
       ))))
 
 ;; Exercises 2.87 and 2.88
