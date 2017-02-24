@@ -133,3 +133,19 @@
     (if (= pass new-password)
       (account old-password m)
       (throw (Exception. "Incorrect password")))))
+
+;; Exercise 3.8
+(defn make-f []
+  (let [ counter (atom 1) ]
+    (fn [n]
+      (do
+        (swap! counter dec)
+        (- (* @counter n))))))
+
+(defn show-f[]
+  (let [ f1 (make-f)
+         f2 (make-f)]
+    (println "F1: " (+ (f1 0) (f1 1)))
+    (println "F2: " (+ (f2 1) (f2 0)))))
+
+
