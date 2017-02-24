@@ -127,3 +127,9 @@
         (= 'generate arg) (generate)
         (= 'reset) set-new))))
 
+;; Exercise 3.7
+(defn make-joint [account old-password new-password]
+  (fn [pass m]
+    (if (= pass new-password)
+      (account old-password m)
+      (throw (Exception. "Incorrect password")))))
