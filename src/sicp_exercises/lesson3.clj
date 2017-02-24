@@ -107,3 +107,23 @@
     (println "Area of the circle with radious 3= " (estimate-integral circle-3 2.0 8.0 4.0 10.0 1000000))
     (println "Pi estimation using unit circle= " (estimate-integral circle-1 -1.0 1.0 -1.0 1.0 10000000))
     ))
+
+;; Exercise 3.6
+(defn make-random-generator []
+  (let [ current (atom 1)
+         a 1664525
+         b 1013904223
+         m (Math/pow 2 32)
+         generate (fn []
+                    (do
+                      (swap! current #(rem (+ (* a %) b) m))
+                      @current))
+
+         set-new (fn [value]
+                   (reset! current value))]
+
+    (fn [arg]
+      (cond
+        (= 'generate arg) (generate)
+        (= 'reset) set-new))))
+
