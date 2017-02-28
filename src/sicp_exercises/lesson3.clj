@@ -1,6 +1,7 @@
 (ns sicp-exercises.lesson3
   (:require [sicp-exercises.lesson1]
-            [sicp-exercises.graphics :as g]))
+            [sicp-exercises.graphics :as g])
+  (:use [sicp-exercises.pairs]))
 
 ;; Withdraw examples
 (defn new-withdraw []
@@ -147,5 +148,8 @@
          f2 (make-f)]
     (println "F1: " (+ (f1 0) (f1 1)))
     (println "F2: " (+ (f2 1) (f2 0)))))
+
+;; Exercise 3.17
+
 
 
