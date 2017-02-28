@@ -1,6 +1,9 @@
 (ns sicp-exercises.lesson3
   (:require [sicp-exercises.lesson1]
-            [sicp-exercises.graphics :as g])
+            [sicp-exercises.graphics :as g]
+            [sicp-exercises.pairs]
+            )
+  (:import (sicp_exercises.pairs Pair))
   (:use [sicp-exercises.pairs]))
 
 ;; Withdraw examples
@@ -150,6 +153,20 @@
     (println "F2: " (+ (f2 1) (f2 0)))))
 
 ;; Exercise 3.17
+(defn count-pairs-wrong [x]
+  (if (not (is-pair? x))
+    0
+    (+ (count-pairs-wrong (.car x))
+       (count-pairs-wrong (.cdr x))
+       1)))
 
+(defn show-count-pairs[]
+  (let [ test-pair (pair-from-list '(a b c d))
+         pair1 (Pair. 'a (Pair. 'b nil))
+         pair2 (Pair. pair1 pair1)
+         ]
+    (println "Wrong count (right result): " (count-pairs-wrong test-pair))
+    (println "Wrong count (wrong result): " (count-pairs-wrong pair2))
+    ))
 
 
