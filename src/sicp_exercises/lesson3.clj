@@ -160,6 +160,17 @@
        (count-pairs-wrong (.cdr x))
        1)))
 
+(defn count-pairs[x]
+  (loop [ to-test #{x}
+          tested #{}]
+    (if (= (count to-test) 0)
+      (count tested)
+      (let [extracted (first to-test)]
+        (if (and (is-pair? extracted) (not (tested extracted)))
+          (recur (conj (conj (disj to-test extracted) (.car extracted)) (.cdr extracted)) (conj tested extracted))
+          (recur (disj to-test extracted) tested))))))
+
+
 (defn show-count-pairs[]
   (let [ test-pair (pair-from-list '(a b c d))
          pair1 (Pair. 'a (Pair. 'b nil))
@@ -167,6 +178,6 @@
          ]
     (println "Wrong count (right result): " (count-pairs-wrong test-pair))
     (println "Wrong count (wrong result): " (count-pairs-wrong pair2))
+    (println "Right count: " (count-pairs test-pair))
+    (println "Right count: " (count-pairs pair2))
     ))
-
-
