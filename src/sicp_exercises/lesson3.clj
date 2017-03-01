@@ -183,8 +183,8 @@
 
 ;; Exercise 3.18
 (defn loops? [p]
-    (loop [ to-test #{p}
-            tested-cdrs #{}]
+  (loop [ to-test #{p}
+          tested-cdrs #{}]
     (if (= (count to-test) 0)
       false
       (let [extracted (first to-test)]
@@ -201,3 +201,26 @@
     (println "Loops in test-pair: " (loops? test-pair))
     (println "Loops in pair1: " (loops? pair1))))
 
+;; Exercise 3.19
+(defn loops-cte? [p]
+  (loop [ to-test #{p} ]
+    (if (= (count to-test) 0)
+      false
+      (let [extracted (first to-test)]
+        (cond
+          (and (is-pair? extracted) (= :loop_indicator (.getCar extracted)))
+            true
+          (and (is-pair? extracted) (not (= :loop_indicator (.getCar extracted))))
+            (do
+              (.setCar extracted :loop_indicator)
+              (recur (conj (disj to-test extracted) (.getCdr extracted))))
+          :else
+            (recur (disj to-test extracted)))))))
+
+(defn show-loops-cte[]
+  (let [ test-pair (pair-from-list '(a b c d))
+         pair1 (Pair. 'a (Pair. 'b nil))]
+
+    (.setCdr (.getCdr pair1) pair1)
+    (println "Loops in test-pair: " (loops-cte? test-pair))
+    (println "Loops in pair1: " (loops-cte? pair1))))
