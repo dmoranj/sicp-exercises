@@ -314,3 +314,92 @@
     (println "Pop Q1: " ((q1 'popq!)))
     (println "Q1: " ((q1 'printq)))
   ))
+
+;; Exercise 3.22
+(defn make-dequeue []
+  (Pair. nil nil))
+
+(defn front-dequeue [q]
+  (.getCar q))
+
+(defn rear-dequeue [q]
+  (.getCdr q))
+
+(defn empty-dequeue? [q]
+  (nil? (front-dequeue q)))
+
+(defn set-front-dequeue! [q v]
+  (.setCar q v))
+
+(defn set-rear-dequeue! [q v]
+  (.setCdr q v))
+
+(defn print-dequeue [queue]
+  (str "( "
+       (loop [current (front-dequeue queue)
+              result ""]
+         (if (nil? current)
+           result
+           (recur (.getCdr current) (str result (.getCar (.getCar current)) " ")))) ")"))
+
+(defn front-insert-dequeue! [queue item]
+  (let [ new-pair (Pair. item nil)
+         indirection (Pair. new-pair nil)]
+    (if (empty-queue? queue)
+      (do
+        (set-front-dequeue! queue indirection)
+        (set-rear-dequeue! queue indirection)
+        queue)
+      (do
+        (println "Setting indirection")
+        (.setCdr indirection (front-dequeue queue))
+        (println "Setting new car. FD: " (front-dequeue queue) )
+        (.setCdr (.getCar (front-dequeue queue)) indirection)
+        (set-front-dequeue! queue indirection)
+        queue
+        ))))
+
+(defn rear-insert-dequeue! [queue item]
+  (let [ new-pair (Pair. item nil)
+         indirection (Pair. new-pair nil)]
+    (if (empty-queue? queue)
+      (do
+        (set-front-dequeue! queue indirection)
+        (set-rear-dequeue! queue indirection)
+        queue)
+      (do
+        (.setCdr (rear-dequeue queue) indirection)
+        (.setCdr new-pair (rear-dequeue queue))
+        (set-rear-dequeue! queue indirection)
+        queue))))
+
+(defn front-delete-dequeue! [queue]
+  (if (empty-queue? queue)
+    (throw (Exception. "DELETE! called with an empty queue"))
+    (do
+      (set-front-dequeue! queue (.getCdr (front-dequeue queue)))
+      (.setCdr (front-dequeue queue) nil)
+      queue
+      )))
+
+(defn rear-delete-dequeue! [queue]
+  (if (empty-queue? queue)
+    (throw (Exception. "DELETE! called with an empty queue"))
+    (let [ but-last-item (.getCdr (.getCar (rear-dequeue queue))) ]
+      (set-rear-dequeue! queue but-last-item)
+      (.setCdr but-last-item nil)
+      queue
+      )))
+
+(defn show-double-linked[]
+  (let [ q1 (make-dequeue) ]
+    (println "Q1: " (print-dequeue q1))
+    (front-insert-dequeue! q1 :m)
+    (front-insert-dequeue! q1 :f)
+    (rear-insert-dequeue! q1 :r)
+    (println "Q1: " (print-dequeue q1))
+    (rear-delete-dequeue! q1)
+    (println "Q1: " (print-dequeue q1))
+    (front-delete-dequeue! q1)
+    (println "Q1: " (print-dequeue q1))
+    ))
