@@ -2,9 +2,11 @@
   (:require [sicp-exercises.lesson1]
             [sicp-exercises.graphics :as g]
             [sicp-exercises.pairs]
+            [sicp-exercises.queue]
             )
   (:import (sicp_exercises.pairs Pair))
-  (:use [sicp-exercises.pairs]))
+  (:use [sicp-exercises.pairs]
+        [sicp-exercises.queue]))
 
 ;; Withdraw examples
 (defn new-withdraw []
@@ -224,3 +226,27 @@
     (.setCdr (.getCdr pair1) pair1)
     (println "Loops in test-pair: " (loops-cte? test-pair))
     (println "Loops in pair1: " (loops-cte? pair1))))
+
+;; Exercise 3.21
+(defn print-queue[q]
+  (let [ print-list (fn print-list[l]
+                      (loop [ current l
+                              result "" ]
+                        (if (nil? current)
+                          result
+                          (recur (.getCdr current) (str result (.getCar current) " "))
+                          ))) ]
+
+    (if (nil? q)
+      "( )"
+      (str "( " (print-list (front-ptr q)) ")"))))
+
+
+(defn show-print-queue[]
+  (let [q1 (make-queue)]
+    (println (print-queue q1))
+    (println (print-queue (insert-queue! q1 'a)))
+    (println (print-queue (insert-queue! q1 'b)))
+    (println (print-queue (delete-queue! q1)))
+    (println (print-queue (delete-queue! q1)))
+    ))

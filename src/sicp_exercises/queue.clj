@@ -41,7 +41,10 @@
 
 (defn delete-queue! [queue]
   (if (empty-queue? queue)
-    (throw (Exception. "DELETE! called with an empty queue")))
-    (set-front-ptr! queue (.getCdr (front-ptr queue))))
+    (throw (Exception. "DELETE! called with an empty queue"))
+    (do
+      (set-front-ptr! queue (.getCdr (front-ptr queue)))
+      queue
+      )))
 
 (def q (make-queue))
