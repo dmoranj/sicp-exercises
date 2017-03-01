@@ -156,8 +156,8 @@
 (defn count-pairs-wrong [x]
   (if (not (is-pair? x))
     0
-    (+ (count-pairs-wrong (.car x))
-       (count-pairs-wrong (.cdr x))
+    (+ (count-pairs-wrong (.getCar x))
+       (count-pairs-wrong (.getCdr x))
        1)))
 
 (defn count-pairs[x]
@@ -167,9 +167,8 @@
       (count tested)
       (let [extracted (first to-test)]
         (if (and (is-pair? extracted) (not (tested extracted)))
-          (recur (conj (conj (disj to-test extracted) (.car extracted)) (.cdr extracted)) (conj tested extracted))
+          (recur (conj (conj (disj to-test extracted) (.getCar extracted)) (.getCdr extracted)) (conj tested extracted))
           (recur (disj to-test extracted) tested))))))
-
 
 (defn show-count-pairs[]
   (let [ test-pair (pair-from-list '(a b c d))
@@ -181,3 +180,24 @@
     (println "Right count: " (count-pairs test-pair))
     (println "Right count: " (count-pairs pair2))
     ))
+
+;; Exercise 3.18
+(defn loops? [p]
+    (loop [ to-test #{p}
+            tested-cdrs #{}]
+    (if (= (count to-test) 0)
+      false
+      (let [extracted (first to-test)]
+        (cond
+          (and (is-pair? extracted) (tested-cdrs extracted)) true
+          (and (is-pair? extracted) (not (tested-cdrs extracted))) (recur (conj (conj (disj to-test extracted) (.getCar extracted)) (.getCdr extracted)) (conj tested-cdrs extracted))
+          :else (recur (disj to-test extracted) tested-cdrs))))))
+
+(defn show-loops[]
+  (let [ test-pair (pair-from-list '(a b c d))
+         pair1 (Pair. 'a (Pair. 'b nil))]
+
+    (.setCdr (.getCdr pair1) pair1)
+    (println "Loops in test-pair: " (loops? test-pair))
+    (println "Loops in pair1: " (loops? pair1))))
+
