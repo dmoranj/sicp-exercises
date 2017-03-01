@@ -250,3 +250,67 @@
     (println (print-queue (delete-queue! q1)))
     (println (print-queue (delete-queue! q1)))
     ))
+
+;; Exercise 3.22
+(defn make-proc-queue[]
+  (let [ front-ptr (atom nil)
+         rear-ptr (atom nil)
+         is-empty? (fn []
+                     (nil? front-ptr))
+
+         pushq! (fn [v]
+                  (let [ new-pair (Pair. v nil) ]
+                    (if (nil? @rear-ptr)
+                      (do
+                        (reset! rear-ptr new-pair)
+                        (reset! front-ptr new-pair))
+                      (do
+                        (.setCdr @rear-ptr new-pair)
+                        (reset! rear-ptr new-pair)))))
+
+         popq! (fn []
+                 (let [ result @front-ptr ]
+                   (reset! front-ptr (.getCdr result))
+                   (.getCar result)
+                   ))
+
+         peekq (fn []
+                 (.getCar @front-ptr))
+
+         deleteq (fn []
+                   (if (nil? @front-ptr)
+                     (throw (Exception. "Tried to remove an item from an empty queue"))
+                     (reset! front-ptr (.getCdr @front-ptr))))
+
+         printq (fn []
+                  (str "("
+                       (loop [current @front-ptr
+                              result ""]
+                         (if (nil? current)
+                           result
+                           (recur (.getCdr current) (str result (.getCar current) " " ))))
+                       ")" ))
+
+         dispatch (fn [m]
+                    (cond
+                      (= m 'is-empty?) is-empty?
+                      (= m 'pushq!) pushq!
+                      (= m 'popq!) popq!
+                      (= m 'peekq) peekq
+                      (= m 'deleteq) deleteq
+                      (= m 'printq) printq
+                      :else (throw (Exception. "Unknown operation for procedural queue"))))]
+    dispatch))
+
+(defn show-proc-queue []
+  (let [q1 (make-proc-queue)]
+    (println "Q1: " ((q1 'printq)))
+    ((q1 'pushq!) :a)
+    (println "Q1: " ((q1 'printq)))
+    ((q1 'pushq!) :b)
+    (println "Q1: " ((q1 'printq)))
+    (println "Pop Q1: " ((q1 'popq!)))
+    (println "Q1: " ((q1 'printq)))
+    (println "Pop Q1: " ((q1 'popq!)))
+    (println "Q1: " ((q1 'printq)))
+  ))
