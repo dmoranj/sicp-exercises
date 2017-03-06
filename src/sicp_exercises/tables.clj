@@ -15,14 +15,19 @@
       (.getCdr record)
       false)))
 
-(defn lookup [ key1 key2 table ]
-  (let [ subtable (t-assoc key1 (.getCdr table)) ]
-    (if subtable
-      (let [ record (t-assoc key2 (.getCdr subtable)) ]
+(defn t-lookup [ key-vector table ]
+    (if (== (count key-vector) 1)
+      (let [record (t-assoc (first key-vector) (.getCdr table))]
         (if record
           (.getCdr record)
           false))
-      false)))
+
+      (let [ remaining (rest key-vector)
+             subtable (t-assoc (first key-vector) (.getCdr table)) ]
+
+        (if subtable
+          (t-lookup remaining subtable)
+          false))))
 
 (defn rec-insert [k value table]
   (let [record (t-assoc k (.getCdr table))]
@@ -57,8 +62,8 @@
      (t-insert! [ :letters :b ] 97 table)
      (t-insert! [ :letters :a ] 98 table)
      (println "Full table: " table)
-;;     (println "Value for keys :math :* = " (lookup :math :* table))
-;;     (println "Value for key :letters :b = " (lookup :letters :b table))
+     (println "Value for keys :math :* = " (t-lookup [ :math :* ] table))
+     (println "Value for key :letters :b = " (lookup :letters :b table))
     ))
 
 (defn show-tables[]
@@ -69,5 +74,3 @@
     (println "Value for key :math = " (t-lookup :math table))
     (println "Value for key :letters = " (t-lookup :letters table))
     ))
-
-(show-tables-2-keys)
