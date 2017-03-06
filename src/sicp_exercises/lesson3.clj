@@ -315,7 +315,7 @@
     (println "Q1: " ((q1 'printq)))
   ))
 
-;; Exercise 3.22
+;; Exercise 3.23
 (defn make-dequeue []
   (Pair. nil nil))
 
