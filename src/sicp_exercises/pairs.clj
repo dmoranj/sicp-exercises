@@ -79,6 +79,3 @@
     (println (list-from-pair test-pair))
     (println (print-pair-list test-pair))
   ))
-
-
-(show-pairs)

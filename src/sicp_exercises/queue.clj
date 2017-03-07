@@ -51,10 +51,13 @@
     (insert-queue! q 2)
     (insert-queue! q 3)
     (insert-queue! q 4)
-    (insert-queue! q 5)
     (println "First " (front-queue q))
     (delete-queue! q)
     (println "Second " (front-queue q))
     (delete-queue! q)
     (println "Third " (front-queue q))
-    (delete-queue! q)))
+    (delete-queue! q)
+    q))
+
+(show-queues)
+

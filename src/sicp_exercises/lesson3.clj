@@ -3,10 +3,12 @@
             [sicp-exercises.graphics :as g]
             [sicp-exercises.pairs]
             [sicp-exercises.queue]
+            [sicp-exercises.circuits]
             )
   (:import (sicp_exercises.pairs Pair))
   (:use [sicp-exercises.pairs]
-        [sicp-exercises.queue]))
+        [sicp-exercises.queue]
+        [sicp-exercises.circuits]))
 
 ;; Withdraw examples
 (defn new-withdraw []
@@ -469,3 +471,35 @@
     (println "Value for key :aircraft = " ((tree-table 'lookup-proc) :aircraft))))
 
 ;; Exercise 3.29 (Composed OR gate)
+(defn composed-or [i1 i2 o]
+  (let [ a (make-wire)
+         b (make-wire)
+         c (make-wire) ]
+    (inverter i1 a)
+    (inverter i2 b)
+    (probe 'and-i1 a)
+    (probe 'and-i2 b)
+    (probe 'and-output c)
+    (and-gate a b c)
+    (inverter c o)))
+
+(defn show-composed-or[]
+  (let [ input-1 (make-wire)
+         input-2 (make-wire)
+         output-1 (make-wire)]
+
+    (probe 'input1 input-1)
+    (probe 'input2 input-2)
+    (probe 'composed output-1)
+    (composed-or input-1 input-2 output-1)
+    (set-signal! input-1 0)
+    (set-signal! input-2 1)
+    (println "Propagating signal.....")
+    (propagate)
+    (println "Output signal (0 OR 1): " (get-signal output-1))
+    (set-signal! input-1 0)
+    (set-signal! input-2 0)
+    (println "Propagating signal.....")
+    (propagate)
+    (println "Output signal (0 OR 0): " (get-signal output-1))
+    ))
