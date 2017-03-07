@@ -403,3 +403,68 @@
     (front-delete-dequeue! q1)
     (println "Q1: " (print-dequeue q1))
     ))
+
+;; Exercise 3.26
+(defn make-tree-table []
+  (let [ local-table (Pair. '*table* nil)
+
+         lookup-node (fn lookup-node [key1 current]
+                           (let [ current-key (.getCar (.getCar current))
+                                  left (.getCar (.getCdr current))
+                                  right (.getCdr (.getCdr current)) ]
+                             (cond
+                               (= current-key key1) (.getCdr (.getCar current))
+                               (< (compare key1 current-key) 0) (if (nil? left)
+                                                      false
+                                                      (lookup-node key1 left))
+                               (> (compare key1 current-key) 0) (if (nil? right)
+                                                      false
+                                                      (lookup-node key1 right)))))
+
+         lookup (fn lookup [key1]
+                  (if (nil? (.getCdr local-table))
+                    false
+                    (lookup-node key1 (.getCdr local-table))))
+
+         make-empty-node (fn make-empty-node[key1 value]
+                           (Pair. (Pair. key1
+                                         value)
+                                  (Pair. nil
+                                         nil)))
+
+         insert-in-node! (fn insert-in-node![key1 value current]
+                           (let [ current-key (.getCar (.getCar current))
+                                  left (.getCar (.getCdr current))
+                                  right (.getCdr (.getCdr current)) ]
+                             (cond
+                               (= current-key key1) (.setCdr (.getCar current) value)
+                               (< (compare key1 current-key) 0) (if (nil? left)
+                                                      (.setCar (.getCdr current) (make-empty-node key1 value))
+                                                      (insert-in-node! key1 value left))
+
+                               (> (compare key1 current-key) 0) (if (nil? right)
+                                                      (.setCdr (.getCdr current) (make-empty-node key1 value))
+                                                      (insert-in-node! key1 value right)))))
+
+         insert! (fn insert! [key1 value]
+                   (let [ root (.getCdr local-table) ]
+                     (if (nil? root)
+                       (.setCdr local-table (make-empty-node key1 value))
+                       (insert-in-node! key1 value root))))
+
+         dispatch (fn dispatch [m]
+                    (cond
+                      (= m 'lookup-proc) lookup
+                      (= m 'insert-proc) insert!
+                      :else (throw (Exception. "Unknown operation for tree table"))))]
+    dispatch))
+
+(defn show-tree-table[]
+  (let [ tree-table (make-tree-table) ]
+    ((tree-table 'insert-proc) :math :+)
+    ((tree-table 'insert-proc) :letters :a)
+    ((tree-table 'insert-proc) :aircraft :plane)
+    ((tree-table 'insert-proc) :zealots :fenix)
+    (println "Value for key :math = " ((tree-table 'lookup-proc) :math))
+    (println "Value for key :aircraft = " ((tree-table 'lookup-proc) :aircraft))))
+
