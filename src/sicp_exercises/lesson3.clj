@@ -468,3 +468,4 @@
     (println "Value for key :math = " ((tree-table 'lookup-proc) :math))
     (println "Value for key :aircraft = " ((tree-table 'lookup-proc) :aircraft))))
 
+;; Exercise 3.29 (Composed OR gate)

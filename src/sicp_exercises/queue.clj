@@ -3,7 +3,6 @@
   (:import (sicp_exercises.pairs Pair))
   (:use [sicp-exercises.pairs]))
 
-
 (defn front-ptr [queue]
   (.getCar queue))
 
@@ -47,4 +46,15 @@
       queue
       )))
 
-(def q (make-queue))
+(defn show-queues[]
+  (let [ q (make-queue) ]
+    (insert-queue! q 2)
+    (insert-queue! q 3)
+    (insert-queue! q 4)
+    (insert-queue! q 5)
+    (println "First " (front-queue q))
+    (delete-queue! q)
+    (println "Second " (front-queue q))
+    (delete-queue! q)
+    (println "Third " (front-queue q))
+    (delete-queue! q)))
