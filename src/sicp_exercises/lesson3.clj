@@ -535,3 +535,45 @@
     (set-value! v4 10 'user)
     (set-value! result2 6 'user)
     ))
+
+;; Exercise 3.36
+(defn squarer [a b]
+  (letfn [ (process-new-value []
+                              (if (has-value? b)
+                                (if (< (get-value b) 0)
+                                  (throw (Exception. (str "Square less than 0 -- SQUARER" (get-value b))))
+                                  (set-value! a
+                                              (Math/sqrt (get-value b))
+                                              me))
+                                (set-value! b
+                                            (* (get-value a) (get-value a))
+                                            me)))
+
+           (process-forget-value []
+                                 (forget-value! a me)
+                                 (forget-value! b me)
+                                 (process-new-value))
+
+           (me [request]
+               (cond
+                 (= request 'I-have-a-value) (process-new-value)
+                 (= request 'I-lost-my-value) (process-forget-value)
+                 :else (throw (Exception. "Unknown request --- SQUARER")))) ]
+    (connect a me)
+    (connect b me)
+    me))
+
+(defn show-squarer[]
+  (let [ v1 (make-connector)
+         v2 (make-connector)
+         result1 (make-connector)
+         result2 (make-connector) ]
+    (const-probe "Input1: " v1)
+    (const-probe "Input2: " v2)
+    (const-probe "Result: " result1)
+    (const-probe "Result2: " result2)
+    (squarer v1 result1)
+    (set-value! v1 12 'user)
+    (squarer v2 result2)
+    (set-value! result2 25 'user)
+    ))

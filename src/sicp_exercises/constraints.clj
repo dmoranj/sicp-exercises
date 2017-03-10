@@ -51,7 +51,8 @@
 
       (connect a1 me)
       (connect a2 me)
-      (connect sum me)))
+      (connect sum me)
+    me))
 
 (defn multiplier [m1 m2 product]
   (letfn [ (process-new-value []
@@ -81,7 +82,8 @@
                  :else (throw (Exception. "Unknown request --- ADDER")))) ]
     (connect m1 me)
     (connect m2 me)
-    (connect product me)))
+    (connect product me)
+    me))
 
 (defn constant [value connector]
   (let [ me (fn [request]
