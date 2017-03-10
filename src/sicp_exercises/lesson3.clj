@@ -3,11 +3,13 @@
             [sicp-exercises.graphics :as g]
             [sicp-exercises.pairs]
             [sicp-exercises.queue]
+            [sicp-exercises.constraints]
             [sicp-exercises.circuits]
             )
   (:import (sicp_exercises.pairs Pair))
   (:use [sicp-exercises.pairs]
         [sicp-exercises.queue]
+        [sicp-exercises.constraints]
         [sicp-exercises.circuits]))
 
 ;; Withdraw examples
@@ -502,4 +504,34 @@
     (println "Propagating signal.....")
     (propagate)
     (println "Output signal (0 OR 0): " (get-signal output-1))
+    ))
+
+;; Exercise 3.33
+(defn averager [a b c]
+  (let [ s (make-connector)
+         d (make-connector) ]
+    (adder a b s)
+    (multiplier d c s)
+    (constant 2 d)
+    'ok))
+
+(defn show-averager[]
+  (let [ v1 (make-connector)
+         v2 (make-connector)
+         result1 (make-connector)
+         v3 (make-connector)
+         v4 (make-connector)
+         result2 (make-connector) ]
+    (const-probe "Input1: " v1)
+    (const-probe "Input2: " v2)
+    (const-probe "Result: " result1)
+    (averager v1 v2 result1)
+    (set-value! v1 12 'user)
+    (set-value! v2 8 'user)
+    (const-probe "Input3: " v3)
+    (const-probe "Input3: " v4)
+    (const-probe "Result2: " result2)
+    (averager v4 v3 result2)
+    (set-value! v4 10 'user)
+    (set-value! result2 6 'user)
     ))
