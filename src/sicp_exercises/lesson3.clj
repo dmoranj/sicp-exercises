@@ -577,3 +577,41 @@
     (squarer v2 result2)
     (set-value! result2 25 'user)
     ))
+
+;; Exercise 3.37
+(defn c+ [x y]
+  (let [z (make-connector)]
+    (adder x y z)
+    z))
+
+(defn c- [x y]
+  (let [z (make-connector)]
+    (adder z y x)
+    z))
+
+(defn c* [x y]
+  (let [z (make-connector)]
+    (multiplier x y z)
+    z))
+
+(defn c-div [x y]
+  (let [z (make-connector)]
+    (multiplier y z x)
+    z))
+
+(defn cv [x]
+  (let [z (make-connector)]
+    (constant x z)
+    z))
+
+(defn celsius-farenheit-converter [x]
+  (c+ (c* (c-div (cv 9.0) (cv 5.0))
+          x)
+      (cv 32)))
+
+(defn show-temp-converters[]
+  (let [ C (make-connector)
+         F (celsius-farenheit-converter C) ]
+    (const-probe "Celsius temperature: " C)
+    (const-probe "Farenheit temperature: " F)
+    (set-value! C 27 'user)))
