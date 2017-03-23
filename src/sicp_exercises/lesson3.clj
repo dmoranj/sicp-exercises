@@ -615,3 +615,18 @@
     (const-probe "Celsius temperature: " C)
     (const-probe "Farenheit temperature: " F)
     (set-value! C 27 'user)))
+
+;; Theory section 3.5.3
+(defn sqrt-improve[guess x]
+  (/ (+ guess (/ x guess))
+     2))
+
+(defn sqrt-stream [x]
+  (let [gen-stream (fn gen-stream
+                     ([] (gen-stream 1.0))
+                     ([n] (lazy-seq (cons n
+                                          (gen-stream (sqrt-improve n x))))))]
+    (gen-stream)))
+
+(take 10 (sqrt-stream 2))
+
