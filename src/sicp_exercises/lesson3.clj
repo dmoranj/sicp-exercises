@@ -177,7 +177,8 @@
           (recur (disj to-test extracted) tested))))))
 
 (defn show-count-pairs[]
-  (let [ test-pair (pair-from-list '(a b c d))
+  (let [
+        test-pair (pair-from-list '(a b c d))
          pair1 (Pair. 'a (Pair. 'b nil))
          pair2 (Pair. pair1 pair1)
          ]
@@ -616,6 +617,78 @@
     (const-probe "Farenheit temperature: " F)
     (set-value! C 27 'user)))
 
+;; Theory section 3.5
+(def the-empty-stream nil)
+
+(defmacro delayed [expression]
+  (list 'fn [] expression))
+
+(defn forced [expression]
+  (expression))
+
+(defmacro cons-stream [expression1 expression2]
+  (list 'Pair. expression1
+        (list 'delayed expression2)))
+
+(defn stream-car [stream]
+  (.getCar stream))
+
+(defn stream-cdr [stream]
+  (forced (.getCdr stream)))
+
+(defn stream-null? [stream]
+  (nil? stream))
+
+(defn stream-ref [s n]
+  (if (= n 0)
+    (stream-car s)
+    (stream-ref (stream-cdr s) (- n 1))))
+
+(defn stream-map [proc s]
+  (if (stream-null? s)
+    nil
+    (cons-stream (proc (stream-car s))
+                 (stream-map proc (stream-cdr s)))))
+
+(defn stream-for-each [proc s]
+  (if (stream-null? s)
+    'done
+    (do
+      (proc (stream-car s))
+      (stream-for-each proc (stream-cdr s)))))
+
+(defn stream-filter [pred stream]
+  (cond
+    (stream-null? stream) the-empty-stream
+    (pred (stream-car stream)) (cons-stream (stream-car stream)
+                                            (stream-filter pred
+                                                           (stream-cdr stream)))
+    :else (stream-filter pred (stream-cdr stream))))
+
+(defn display-line [x]
+  (println x))
+
+(defn display-stream [s]
+  (stream-for-each display-line s))
+
+(defn stream-enumerate-interval [low high]
+  (if (> low high)
+    the-empty-stream
+    (cons-stream
+      low
+      (stream-enumerate-interval (inc low) high))))
+
+(defn show-streams []
+  (let [ str1 (stream-enumerate-interval 4 10) ]
+    (println "The sequence: " str1)
+    (println "The forced sequence: ")
+    (display-stream str1)
+    (display-stream (stream-filter #(= 0 (rem % 2)) str1))
+    (display-stream (stream-map #(* % 20) str1))
+    ))
+
+(show-streams)
+
 ;; Theory section 3.5.3
 (defn sqrt-improve[guess x]
   (/ (+ guess (/ x guess))
@@ -628,5 +701,4 @@
                                           (gen-stream (sqrt-improve n x))))))]
     (gen-stream)))
 
-(take 10 (sqrt-stream 2))
 
