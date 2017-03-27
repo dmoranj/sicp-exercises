@@ -620,8 +620,19 @@
 ;; Theory section 3.5
 (def the-empty-stream nil)
 
+(defn memo-proc [proc]
+  (let [ already-run? (atom false)
+         result (atom false) ]
+    (fn []
+      (if (not @already-run?)
+        (do
+          (reset! result (proc))
+          (reset! already-run? true)
+          @result)
+        @result))))
+
 (defmacro delayed [expression]
-  (list 'fn [] expression))
+  (list 'memo-proc (list 'fn [] expression)))
 
 (defn forced [expression]
   (expression))
@@ -712,6 +723,25 @@
   (let [x (stream-map show (stream-enumerate-interval 0 10)) ]
     (println "Printing the value for the 5th element" (stream-ref x 5))
     (println "Printing the value for the 7th element" (stream-ref x 7))))
+
+;; Exercise 3.52
+(defn show-exercise-3-52 []
+  (let [ sum (atom 0)
+         accum (fn [x]
+                 (println "Accumulating for x = " x)
+                 (reset! sum (+ x @sum))
+                 @sum)
+         sequ (stream-map accum (stream-enumerate-interval 1 20))
+         y (stream-filter even? sequ)
+         z (stream-filter #(= (rem % 5) 0) sequ) ]
+
+    (println "The value of @sum is " @sum)
+    (println "The 7th element: " (stream-ref y 7))
+    (println "The value of @sum is " @sum)
+    (display-stream z)
+    (println "The value of @sum is " @sum)
+    ))
+
 
 ;; Theory section 3.5.3
 (defn sqrt-improve[guess x]
