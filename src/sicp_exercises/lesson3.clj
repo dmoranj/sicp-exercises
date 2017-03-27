@@ -801,3 +801,9 @@
 
 (def S (cons-stream 1 (merge-stream (scale-stream S 2) (merge-stream (scale-stream S 3) (scale-stream S 5)))))
 
+;; Exercise 3.58
+(defn expand-stream [nu den radix]
+  (cons-stream
+    (quot (* nu radix) den)
+    (expand-stream (rem (* nu radix) den) den radix)))
+
