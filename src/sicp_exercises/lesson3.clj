@@ -781,5 +781,8 @@
 (defn mul-streams [s1 s2]
   (stream-map * s1 s2))
 
-(def factorials (cons-stream 1 (mul-streams integers factorials)))
+(def factorials (cons-stream 1 (mul-streams (stream-cdr integers) factorials)))
+
+;; Exercise 3.55
+(def partial-sums (cons-stream 1 (add-streams (stream-cdr integers) partial-sums)))
 
