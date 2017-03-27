@@ -807,3 +807,21 @@
     (quot (* nu radix) den)
     (expand-stream (rem (* nu radix) den) den radix)))
 
+;; Exercise 3.59
+(defn display-limited-stream [s i e]
+  (display-stream (stream-map #(stream-ref s %) (stream-enumerate-interval i e))))
+
+(defn integrate-series [stream]
+  (mul-streams stream (stream-map #(/ 1 %) integers)))
+
+(def exp-series
+  (cons-stream 1 (integrate-series exp-series)))
+
+(declare sine-series)
+
+(def cosine-series
+  (cons-stream 1 (integrate-series (scale-stream sine-series -1))))
+
+(def sine-series
+  (cons-stream 0 (integrate-series cosine-series)))
+
