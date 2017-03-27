@@ -743,16 +743,43 @@
     ))
 
 
-;; Theory section 3.5.3
-(defn sqrt-improve[guess x]
-  (/ (+ guess (/ x guess))
-     2))
+;; Theory section 3.5.2
+(defn integers-starting-from [n]
+  (cons-stream n (integers-starting-from (+ n 1))))
 
-(defn sqrt-stream [x]
-  (let [gen-stream (fn gen-stream
-                     ([] (gen-stream 1.0))
-                     ([n] (lazy-seq (cons n
-                                          (gen-stream (sqrt-improve n x))))))]
-    (gen-stream)))
+(defn sieve [stream]
+  (cons-stream
+    (stream-car stream)
+    (sieve (stream-filter
+             (fn [x]
+               (not (= 0 (rem x (stream-car stream)))))
+             (stream-cdr stream)))))
 
+(def primes (sieve (integers-starting-from 2)))
+
+(def ones (cons-stream 1 ones))
+
+(defn add-streams [s1 s2]
+  (stream-map + s1 s2))
+
+(def integers (cons-stream 1 (add-streams ones integers)))
+
+(def fibs (cons-stream 0
+                       (cons-stream 1
+                                    (add-streams (stream-cdr fibs)
+                                                 fibs))))
+
+(defn scale-stream [stream factor]
+  (stream-map (fn [x] (* x factor)) stream))
+
+(def doubled (cons-stream 1 (scale-stream doubled 2)))
+
+;; Exercise 3.53
+(def s (cons-stream 1 (add-streams s s)))
+
+;; Exercise 3.54
+(defn mul-streams [s1 s2]
+  (stream-map * s1 s2))
+
+(def factorials (cons-stream 1 (mul-streams integers factorials)))
 
