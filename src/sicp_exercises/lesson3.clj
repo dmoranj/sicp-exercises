@@ -644,11 +644,11 @@
     (stream-car s)
     (stream-ref (stream-cdr s) (- n 1))))
 
-(defn stream-map [proc s]
+(defn stream-map-single [proc s]
   (if (stream-null? s)
     nil
     (cons-stream (proc (stream-car s))
-                 (stream-map proc (stream-cdr s)))))
+                 (stream-map-single proc (stream-cdr s)))))
 
 (defn stream-for-each [proc s]
   (if (stream-null? s)
@@ -684,10 +684,26 @@
     (println "The forced sequence: ")
     (display-stream str1)
     (display-stream (stream-filter #(= 0 (rem % 2)) str1))
-    (display-stream (stream-map #(* % 20) str1))
+    (display-stream (stream-map-single #(* % 20) str1))
     ))
 
-(show-streams)
+;; Exercise 3.50
+(defn stream-map [proc & argstreams]
+  (if (stream-null? (first argstreams))
+          the-empty-stream
+          (cons-stream
+            (apply proc (map stream-car argstreams))
+            (apply stream-map
+                   (cons proc (map stream-cdr argstreams))))))
+
+(defn show-stream-map[]
+  (let [
+         str1 (stream-enumerate-interval 1 5)
+         str2 (stream-enumerate-interval 6 10)
+         str3 (stream-enumerate-interval 11 15) ]
+    (display-stream (stream-map + str1 str2 str3))))
+
+
 
 ;; Theory section 3.5.3
 (defn sqrt-improve[guess x]
