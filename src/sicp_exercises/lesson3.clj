@@ -703,7 +703,15 @@
          str3 (stream-enumerate-interval 11 15) ]
     (display-stream (stream-map + str1 str2 str3))))
 
+;; Exercise 3.51
+(defn show [x]
+  (println x)
+  x)
 
+(defn show-evaluation-order []
+  (let [x (stream-map show (stream-enumerate-interval 0 10)) ]
+    (println "Printing the value for the 5th element" (stream-ref x 5))
+    (println "Printing the value for the 7th element" (stream-ref x 7))))
 
 ;; Theory section 3.5.3
 (defn sqrt-improve[guess x]
