@@ -825,3 +825,26 @@
 (def sine-series
   (cons-stream 0 (integrate-series cosine-series)))
 
+;; Exercise 3.60
+(defn mul-series [s1 s2]
+  (cons-stream
+    (* (stream-car s1) (stream-car s2))
+    (add-streams
+                 (add-streams
+                   (scale-stream (stream-cdr s2) (stream-car s1))
+                   (scale-stream (stream-cdr s1) (stream-car s2)))
+                 (mul-series (stream-cdr s1) (stream-cdr s2))
+                 )))
+
+(def product (add-streams (mul-series cosine-series cosine-series) (mul-series sine-series sine-series)))
+
+(defn evaluate[series x n]
+  (loop [ result 0
+          i 0
+          s series ]
+    (if (= i n)
+      result
+      (recur
+        (+ result (* (stream-car s) (Math/pow x i)))
+        (inc i)
+        (stream-cdr s)))))
