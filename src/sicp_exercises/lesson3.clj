@@ -948,4 +948,21 @@
                 (stream-cdr t))
     (pairs (stream-cdr s) (stream-cdr t)))))
 
+;; Exercise 3.67
+(defn all-pairs[s t]
+  (cons-stream (list (stream-car s) (stream-car t))
+               (stream-interleave
+                (stream-interleave
+                 (stream-map #(list (stream-car s) %)
+                             (stream-cdr t))
+                 (stream-map #(list % (stream-car t))
+                             (stream-cdr s)))
+
+                (all-pairs (stream-cdr s) (stream-cdr t)))))
+
+(defn show-all-pairs[]
+  (display-limited-stream (all-pairs integers integers) 0 20))
+
+
+
 
