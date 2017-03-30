@@ -637,9 +637,15 @@
 (defn forced [expression]
   (expression))
 
+;;(defmacro cons-stream [expression1 expression2]
+  ;;(list 'Pair. expression1
+        ;;(list 'delayed expression2)))
+;;
+
 (defmacro cons-stream [expression1 expression2]
-  (list 'Pair. expression1
-        (list 'delayed expression2)))
+  (list 'do (list 'println "Constructing stream")
+            (list 'Pair. expression1
+                   (list 'delayed expression2))))
 
 (defn stream-car [stream]
   (.getCar stream))
@@ -784,7 +790,8 @@
 (def factorials (cons-stream 1 (mul-streams (stream-cdr integers) factorials)))
 
 ;; Exercise 3.55
-(def partial-sums (cons-stream 1 (add-streams (stream-cdr integers) partial-sums)))
+(defn partial-sums [s]
+  (cons-stream 1 (add-streams (stream-cdr s) (partial-sums s))))
 
 ;; Exercise 3.56
 (defn merge-stream [s1 s2]
@@ -870,3 +877,43 @@
 
 ;; TODO: Exercises 3.61 and 3.62 don't throw the appropriate results, but the code
 ;; seems pretty straightforward. Will have to revisit again in the future.
+
+;; Theory 3.5.3
+(defn sqrt-improve [guess x]
+  (/ (+ guess (/ x guess)) 2))
+
+(defn sqrt-stream [x]
+  (let [ guesses (atom nil)]
+    (reset! guesses (cons-stream 1.0
+                                 (stream-map #(sqrt-improve % x)
+                                             @guesses)))
+    @guesses))
+
+(defn pi-stream[]
+  (let [ pi-summands (fn pi-summands[n]
+                       (cons-stream (/ 1.0 n)
+                                    (stream-map - (pi-summands (+ n 2)))))]
+    (scale-stream (partial-sums (pi-summands 1)) 4)
+    ))
+
+
+(defn euler-transform[s]
+  (let [s0 (stream-ref s 0)
+        s1 (stream-ref s 1)
+        s2 (stream-ref s 2)]
+    (cons-stream (- s2 (/ (Math/pow (- s2 s1) 2)
+                         (+ s0 (* -2 s1) s2)))
+                 (euler-transform (stream-cdr s)))))
+
+
+(defn make-tableau[transform s]
+  (cons-stream s
+               (make-tableau transform
+                             (transform s))))
+
+(defn accelerated-sequence [transform s]
+  (stream-map stream-car
+              (make-tableau transform s)))
+
+
+
