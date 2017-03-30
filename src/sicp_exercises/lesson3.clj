@@ -933,5 +933,19 @@
 (defn show-ln2[]
   (stream-limit (accelerated-sequence euler-transform (ln2-stream)) 0.00001))
 
+;; Theory 3.5.3
+(defn stream-interleave[s1 s2]
+  (if (stream-null? s1)
+    s2
+    (cons-stream (stream-car s1)
+                 (stream-interleave s2 (stream-cdr s1)))))
+
+(defn pairs[s t]
+  (cons-stream
+   (list (stream-car s) (stream-car t))
+   (stream-interleave
+    (stream-map #(list (stream-car s) %)
+                (stream-cdr t))
+    (pairs (stream-cdr s) (stream-cdr t)))))
 
 
