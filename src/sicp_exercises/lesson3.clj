@@ -923,3 +923,15 @@
   (stream-limit (sqrt-stream x) tolerance))
 
 
+;; Exercise 3.65
+(defn ln2-stream []
+  (let [ ln2-summands (fn ln2-summands[n]
+                        (cons-stream (/ 1.0 n)
+                                     (stream-map - (ln2-summands (inc n)))))]
+    (partial-sums (ln2-summands 1))))
+
+(defn show-ln2[]
+  (stream-limit (accelerated-sequence euler-transform (ln2-stream)) 0.00001))
+
+
+
