@@ -637,15 +637,9 @@
 (defn forced [expression]
   (expression))
 
-;;(defmacro cons-stream [expression1 expression2]
-  ;;(list 'Pair. expression1
-        ;;(list 'delayed expression2)))
-;;
-
 (defmacro cons-stream [expression1 expression2]
-  (list 'do (list 'println "Constructing stream")
-            (list 'Pair. expression1
-                   (list 'delayed expression2))))
+  (list 'Pair. expression1
+        (list 'delayed expression2)))
 
 (defn stream-car [stream]
   (.getCar stream))
@@ -915,5 +909,17 @@
   (stream-map stream-car
               (make-tableau transform s)))
 
+
+;; Exercise 3.64
+(defn stream-limit [stream tolerance]
+  (loop [last-value 1000000
+         s stream]
+    (let [current-value (stream-car s)]
+      (if (< (Math/abs (- current-value last-value)) tolerance)
+        current-value
+        (recur current-value (stream-cdr s))))))
+
+(defn sqrt-tol [x tolerance]
+  (stream-limit (sqrt-stream x) tolerance))
 
 
