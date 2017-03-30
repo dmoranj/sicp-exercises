@@ -848,3 +848,25 @@
         (+ result (* (stream-car s) (Math/pow x i)))
         (inc i)
         (stream-cdr s)))))
+
+;; Exercise 3.61
+(defn invert-unit-series [s1]
+  (cons-stream 1.0
+               (scale-stream (mul-series (stream-cdr s1)
+                                         (invert-unit-series s1))
+                             -1.0)))
+
+;; (display-limited-stream (invert-unit-series integers) 0 10)
+;; (evaluate (mul-streams (invert-unit-series integers) integers) 1.0 20)
+
+;; Exercise 3.62
+(defn div-series[s1 s2]
+  (if (= (stream-car s2) 0)
+    (throw (Exception. "Trying to divide by zero"))
+    (mul-streams s1
+                 (invert-unit-series s2))))
+
+(def tangent-stream (div-series sine-series cosine-series))
+
+;; TODO: Exercises 3.61 and 3.62 don't throw the appropriate results, but the code
+;; seems pretty straightforward. Will have to revisit again in the future.
