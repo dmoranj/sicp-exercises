@@ -985,4 +985,49 @@
 (defn pythagorean-triples[]
   (stream-filter #(= (+ (* (first %) (first %)) (* (second %) (second %))) (second (rest %))) (triples integers integers integers)))
 
+;; Exercise 3.70
+(defn merge-weighted [s1 s2 weight]
+  (cond
+    (stream-null? s1) s2
+    (stream-null? s2) s1
+    :else (let [ s1car (stream-car s1)
+                 s2car (stream-car s2) ]
+            ;;(println "Comparing [" s1car "] with weight= " (weight s1car) " with [" s2car "] with weight " (weight s2car))
+            (cond
+              (<= (weight s1car) (weight s2car)) (cons-stream s1car (merge-weighted (stream-cdr s1)
+                                                                                   s2
+                                                                                   weight))
+              (> (weight s1car) (weight s2car)) (cons-stream s2car (merge-weighted s1
+                                                                                   (stream-cdr s2)
+                                                                                   weight))))))
+
+(defn weighted-pairs[s t weight]
+  (cons-stream (list (stream-car s) (stream-car t))
+               (merge-weighted
+                (stream-interleave
+                 (stream-map #(list (stream-car s) %)
+                             (stream-cdr t))
+                 (stream-map #(list % (stream-car t))
+                             (stream-cdr s)))
+
+                (weighted-pairs (stream-cdr s) (stream-cdr t) weight)
+                weight)))
+
+
+(defn sum-ordered[]
+  (weighted-pairs integers
+                  integers
+                  #(+ (first %) (second %))))
+
+(defn special-sum-stream[]
+  (let [ not-divisible (stream-filter #(and (not= (rem % 2) 0)
+                                            (not= (rem % 3) 0)
+                                            (not= (rem % 5) 0))
+                                      integers)]
+    (stream-filter #(< (first %) (second %))
+                   (weighted-pairs not-divisible
+                                   not-divisible
+                                   #(+ (* 2.0 (first %)) (* 3.0 (second %)) (* 5.0 (first %) (second %)))))))
+
+(display-limited-stream (special-sum-stream) 0 10)
 
