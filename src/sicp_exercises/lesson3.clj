@@ -963,6 +963,12 @@
 (defn show-all-pairs[]
   (display-limited-stream (all-pairs integers integers) 0 20))
 
+;; Exercise 3.68
+(defn pairs-single-row[s t]
+  (stream-interleave
+   (stream-map #(list (stream-car s) %)
+               t)
+   (pairs-single-row (stream-cdr s) (stream-cdr t))))
 
 
 
