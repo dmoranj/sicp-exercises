@@ -970,5 +970,19 @@
                t)
    (pairs-single-row (stream-cdr s) (stream-cdr t))))
 
+;; Exercise 3.69
+(defn most-triples[s t u]
+  (cons-stream (list (stream-car u) (stream-car s) (stream-car t))
+               (stream-interleave (stream-interleave (stream-map #(list (stream-car u) (stream-car s) %) (stream-cdr t))
+                                                     (stream-map #(list (stream-car u) % (stream-car t)) (stream-cdr s)))
+                                  (stream-interleave (stream-map #(list (stream-car u) (first %) (second %)) (pairs (stream-cdr s) (stream-cdr t)))
+                                                     (most-triples (stream-cdr s) (stream-cdr t) (stream-cdr u))))))
+
+(defn triples[s t u]
+  (stream-filter #(and (<= (first %) (second %)) (<= (second %) (second (rest %)))) (most-triples s t u)))
+
+
+(defn pythagorean-triples[]
+  (stream-filter #(= (+ (* (first %) (first %)) (* (second %) (second %))) (second (rest %))) (triples integers integers integers)))
 
 
