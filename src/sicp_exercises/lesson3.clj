@@ -1104,4 +1104,29 @@
     (display-limited-stream zero-crossings 1 20)
     ))
 
+;; Theory 3.5.4
+;; TODO: The current implementation of lazy streams in the exercises has some problems
+;; regarding the maximum number of function calls. The following calculation of the value
+;; of e works as expected (though the error in this number of iterations is huge):
+;;
+;;  (stream-ref (solve identity 1 0.001) 50)
+;;
+;; but the same exact execution for as low as 80 iterations raise an StackOverflow error.
+;; The problem most probably lies in a malfunction of the "delayed" function that stands
+;; for Scheme's "delay" function in these exercises (or maybe the memoization function).
+;; This problem will require careful examination, so the rest of the Exercises of this
+;; section will be delayed until this problem has been dealt with.
+(defn integral [delayed-integrand initial-value dt]
+  (let [ integ (atom nil)]
+    (reset! integ (cons-stream initial-value
+                               (let [integrand (forced delayed-integrand)]
+                                 (add-streams (scale-stream integrand dt)
+                                              @integ))))
+    @integ))
+
+(defn solve [f y0 dt]
+  (letfn [(y [] (integral (delayed (dy)) y0 dt))
+          (dy [] (stream-map f (y))) ]
+    (y)))
+
 
