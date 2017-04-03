@@ -1031,3 +1031,23 @@
 
 (display-limited-stream (special-sum-stream) 0 10)
 
+;; Exercise 3.71
+(defn ramanujan-numbers[]
+  (let [weight #(+ (* (first %) (first %) (first %))
+                   (* (second %) (second %) (second %)))
+        tripled-stream (stream-filter #(< (first %) (second %))
+                                      (weighted-pairs integers
+                                                      integers
+                                                      weight))
+        ramanujan-stream (fn ramanujan-stream[s]
+                           (let [s0 (stream-ref s 0)
+                                 s1 (stream-ref s 1)]
+                             (if (= (weight s0) (weight s1))
+                               (cons-stream (weight s0) (ramanujan-stream (stream-cdr s)))
+                               (ramanujan-stream (stream-cdr s)))))]
+    (ramanujan-stream tripled-stream)))
+
+
+(display-limited-stream (ramanujan-numbers) 0 5)
+
+
