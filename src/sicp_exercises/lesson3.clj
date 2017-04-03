@@ -1089,4 +1089,19 @@
     (display-limited-stream zero-crossings-alt 1 20)
     ))
 
+;; Exercise 3.76
+(defn smooth [stream]
+  (let [avg-x (/ (+ (stream-ref stream 0) (stream-ref stream 1)) 2)]
+    (cons-stream avg-x
+                 (smooth (stream-cdr stream)))))
+
+(defn show-smoothed-cross[]
+  (let [sense-data cosine-series
+        zero-crossings (make-zero-crossings (smooth sense-data) 0)]
+    (println "--------------------- Origin --------------------------")
+    (display-limited-stream (smooth sense-data) 1 20)
+    (println "--------------------- z-cross --------------------------")
+    (display-limited-stream zero-crossings 1 20)
+    ))
+
 
