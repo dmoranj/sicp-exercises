@@ -1048,6 +1048,20 @@
     (ramanujan-stream tripled-stream)))
 
 
-(display-limited-stream (ramanujan-numbers) 0 5)
+;; Exercise 3.73
+(defn integral[integrand initial-value dt]
+  (let [ integ (atom nil)]
+    (reset! integ (cons-stream initial-value
+                               (add-streams (scale-stream integrand dt)
+                                            @integ)))
+      @integ))
+
+(defn RC [R C dt]
+  (fn RC1 [i-stream v0]
+    (add-streams (scale-stream i-stream R)
+                 (integral (scale-stream i-stream (/ 1 C))
+                           v0
+                           dt))))
+
 
 
