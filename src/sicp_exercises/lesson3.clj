@@ -1042,7 +1042,7 @@
         ramanujan-stream (fn ramanujan-stream[s]
                            (let [s0 (stream-ref s 0)
                                  s1 (stream-ref s 1)]
-                             (if (= (weight s0) (weight s1))
+                              (if (= (weight s0) (weight s1))
                                (cons-stream (weight s0) (ramanujan-stream (stream-cdr s)))
                                (ramanujan-stream (stream-cdr s)))))]
     (ramanujan-stream tripled-stream)))
@@ -1063,5 +1063,30 @@
                            v0
                            dt))))
 
+;; Exercise 3.74
+(defn sign-change-detector[v2 v1]
+  (cond
+    (and (< v1 0) (>= v2 0)) 1
+    (and (< v2 0) (>= v1 0)) -1
+    :else 0))
+
+(defn make-zero-crossings[input-stream last-value]
+  (cons-stream
+   (sign-change-detector (stream-car input-stream) last-value)
+   (make-zero-crossings (stream-cdr input-stream)
+                        (stream-car input-stream))))
+
+(defn show-crossings[]
+  (let [sense-data cosine-series
+        zero-crossings (make-zero-crossings sense-data 0)
+        zero-crossings-alt (stream-map sign-change-detector (stream-cdr sense-data) sense-data)]
+
+    (println "--------------------- Origin --------------------------")
+    (display-limited-stream cosine-series 1 20)
+    (println "--------------------- z-cross --------------------------")
+    (display-limited-stream zero-crossings 1 20)
+    (println "--------------------- z-cross-alt --------------------------")
+    (display-limited-stream zero-crossings-alt 1 20)
+    ))
 
 
